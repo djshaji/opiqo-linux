@@ -243,19 +243,26 @@ private:
 // ============================================================================
 
 struct AtomState {
-    std::vector<uint8_t> ui_to_dsp;
-    uint32_t ui_to_dsp_type = 0;
-    std::atomic<bool> ui_to_dsp_pending{false};
-    mutable std::mutex ui_to_dsp_mutex;
+    // Lock-free UI→DSP message queue.
+    // Wire format per message: [LV2_Atom (type, size)][body bytes…]
+    // Single-producer (UI thread), single-consumer (audio/RT thread).
+    lv2_ringbuffer_t* ui_to_dsp = nullptr;
+
+    // Lock-free DSP→UI message queue (unchanged).
     lv2_ringbuffer_t* dsp_to_ui = nullptr;
-    
-    AtomState(size_t ringbuffer_size = 16384) {
-        dsp_to_ui = lv2_ringbuffer_create(ringbuffer_size);
+
+    explicit AtomState(size_t buffer_size = 65536) {
+        ui_to_dsp = lv2_ringbuffer_create(buffer_size);
+        dsp_to_ui = lv2_ringbuffer_create(buffer_size);
     }
-    
+
     ~AtomState() {
+        if (ui_to_dsp) lv2_ringbuffer_free(ui_to_dsp);
         if (dsp_to_ui) lv2_ringbuffer_free(dsp_to_ui);
     }
+
+    AtomState(const AtomState&) = delete;
+    AtomState& operator=(const AtomState&) = delete;
 };
 
 // ============================================================================
@@ -281,38 +288,48 @@ public:
     
     void setValue(const std::variant<float, bool, std::vector<uint8_t>>& val) override {
         try {
-            auto data = std::get<std::vector<uint8_t>>(val);
-            // TODO: how to get type? For now, store data and wait for caller to set type
-            {
-                std::lock_guard<std::mutex> lock(atom_state_->ui_to_dsp_mutex);
-                atom_state_->ui_to_dsp = std::move(data);
+            const auto& data = std::get<std::vector<uint8_t>>(val);
+            // Write as a self-describing LV2 atom (type=0, size=data.size()) to the ringbuffer.
+            LV2_Atom hdr;
+            hdr.type = 0;
+            hdr.size = static_cast<uint32_t>(data.size());
+            const size_t total = sizeof(LV2_Atom) + data.size();
+            if (atom_state_->ui_to_dsp &&
+                lv2_ringbuffer_write_space(atom_state_->ui_to_dsp) >= total) {
+                lv2_ringbuffer_write(atom_state_->ui_to_dsp,
+                                    (const char*)&hdr, sizeof(LV2_Atom));
+                if (!data.empty())
+                    lv2_ringbuffer_write(atom_state_->ui_to_dsp,
+                                        (const char*)data.data(), data.size());
             }
-            atom_state_->ui_to_dsp_pending.store(true, std::memory_order_release);
+            last_written_ = data; // kept for getValue() — UI thread only
         } catch (const std::bad_variant_access&) {
             // Type mismatch, ignore
         }
     }
-    
+
     std::variant<float, bool, std::vector<uint8_t>> getValue() const override {
-        std::lock_guard<std::mutex> lock(atom_state_->ui_to_dsp_mutex);
-        return atom_state_->ui_to_dsp;
+        return last_written_;
     }
-    
+
     Type getType() const override { return Type::AtomPort; }
     const char* getSymbol() const override { return symbol_.c_str(); }
     const LilvPort* getPort() const override { return port_; }
     void reset() override {
-        std::lock_guard<std::mutex> lock(atom_state_->ui_to_dsp_mutex);
-        atom_state_->ui_to_dsp.clear();
+        last_written_.clear();
+        // Note: cannot un-send bytes already written to the ringbuffer.
     }
-    
+
     AtomState* getAtomState() { return atom_state_; }
-    void setMessageType(uint32_t type_urid) { atom_state_->ui_to_dsp_type = type_urid; }
+    void setMessageType(uint32_t /*type_urid*/) {
+        // Type is now encoded per-message in the ringbuffer wire format; no-op.
+    }
 
 private:
     const LilvPort* port_;
     AtomState* atom_state_;
     std::string symbol_;
+    std::vector<uint8_t> last_written_; // cache for getValue(); UI thread only
 };
 
 // ============================================================================
@@ -390,9 +407,6 @@ public:
             return;
         }
 
-        // process() wraps queued bytes as the event body, so store only the atom body.
-        const uint8_t* body = reinterpret_cast<const uint8_t*>(LV2_ATOM_BODY(atom));
-
         // Guard: warn early if the payload would be dropped in process() due to buffer overflow.
         const uint32_t required_space = static_cast<uint32_t>(sizeof(LV2_Atom_Sequence_Body))
             + static_cast<uint32_t>(sizeof(LV2_Atom_Event)) + atom->size;
@@ -401,12 +415,15 @@ public:
                  required_space, target->atom_buf_size, target->symbol.c_str());
         }
 
-        {
-            std::lock_guard<std::mutex> lock(target->atom_state->ui_to_dsp_mutex);
-            target->atom_state->ui_to_dsp.assign(body, body + atom->size);
-            target->atom_state->ui_to_dsp_type = atom->type;  // atom:Object
+        // Write the full LV2_Atom (header + body) to the lock-free UI→DSP ringbuffer.
+        const uint32_t rb_total = static_cast<uint32_t>(sizeof(LV2_Atom)) + atom->size;
+        if (!target->atom_state->ui_to_dsp ||
+            lv2_ringbuffer_write_space(target->atom_state->ui_to_dsp) < rb_total) {
+            LOGE("send_path_parameter: UI→DSP ringbuffer full or null, dropping message for port '%s'",
+                 target->symbol.c_str());
+        } else {
+            lv2_ringbuffer_write(target->atom_state->ui_to_dsp, (const char*)atom, rb_total);
         }
-        target->atom_state->ui_to_dsp_pending.store(true, std::memory_order_release);
         LOGD("send_path_parameter: sent path '%s' as atom:Object with property '%s' (URID %u) to port '%s'",
              abs_path, property_uri, property_urid, target->symbol.c_str());
 
@@ -482,6 +499,22 @@ public:
             return false;
         }
 
+        // Pre-allocate per-channel scratch buffers for de-interleave/re-interleave.
+        // One entry per audio input port, one per audio output port, each sized to max_block_length_.
+        scratch_in_.clear();
+        scratch_out_.clear();
+        for (const auto& p : ports_) {
+            if (!p.is_audio) continue;
+            if (p.is_input)
+                scratch_in_.emplace_back(max_block_length_, 0.0f);
+            else
+                scratch_out_.emplace_back(max_block_length_, 0.0f);
+        }
+
+        // Pre-allocate RT atom event staging buffer for process() Step B.
+        // Sized to hold an LV2_Atom_Event header plus the largest possible atom body.
+        atom_staging_buf_.assign(required_atom_size_ + sizeof(LV2_Atom_Event), 0u);
+
         if (!init_instance()) {
             LOGE("Failed to instantiate plugin");
             return false;
@@ -530,7 +563,10 @@ public:
             delete p.atom_state;
         }
         ports_.clear();
-        
+        scratch_in_.clear();
+        scratch_out_.clear();
+        atom_staging_buf_.clear();
+
         for (auto* control : controls_) {
             delete control;
         }
@@ -564,8 +600,9 @@ public:
     bool process(float* inputBuffer, float* outputBuffer, int numFrames) {
         if (!enabled) {
             // If plugin is bypassed, just copy input to output
+            // inputBuffer is interleaved stereo: numFrames * 2 floats.
             if (inputBuffer && outputBuffer && numFrames > 0) {
-                std::memcpy(outputBuffer, inputBuffer, sizeof(float) * numFrames);
+                std::memcpy(outputBuffer, inputBuffer, sizeof(float) * numFrames * 2);
             }
             return true;
         }
@@ -576,14 +613,33 @@ public:
         if (!inputBuffer || !outputBuffer || numFrames <= 0)
             return false;
 
-        // --- Step A: Connect audio port buffers ---
-        uint32_t input_index = 0, output_index = 0;
-        for (auto& p : ports_) {
-            if (!p.is_audio) continue;
-            
-            float* target = inputBuffer;
-            if (!p.is_input) target = outputBuffer;
-            lilv_instance_connect_port(instance_, p.index, target);
+        // --- Step A: De-interleave input into per-channel scratch buffers and connect ports ---
+        // inputBuffer/outputBuffer are always interleaved stereo (2 ch, numFrames frames).
+        // LV2 plugins expect one separate non-interleaved float* per audio port.
+        {
+            const int in_ch_count = static_cast<int>(scratch_in_.size());
+            for (int ch = 0; ch < in_ch_count; ++ch) {
+                float* dst = scratch_in_[ch].data();
+                const int src_ch = ch % 2; // wrap to available source channels
+                for (int i = 0; i < numFrames; ++i)
+                    dst[i] = inputBuffer[i * 2 + src_ch];
+            }
+            // Zero output scratch buffers so unwritten frames stay silent.
+            for (auto& buf : scratch_out_)
+                std::fill(buf.begin(), buf.begin() + numFrames, 0.0f);
+        }
+        {
+            uint32_t in_port = 0, out_port = 0;
+            for (auto& p : ports_) {
+                if (!p.is_audio) continue;
+                if (p.is_input) {
+                    if (in_port < scratch_in_.size())
+                        lilv_instance_connect_port(instance_, p.index, scratch_in_[in_port++].data());
+                } else {
+                    if (out_port < scratch_out_.size())
+                        lilv_instance_connect_port(instance_, p.index, scratch_out_[out_port++].data());
+                }
+            }
         }
 
         // --- Step B: Process incoming UI→DSP atom messages ---
@@ -591,28 +647,35 @@ public:
             if (!p.is_atom || !p.is_input) continue;
             if (!p.atom_state || !p.atom) continue;
             
-            // Check for pending UI message
-            if (p.atom_state->ui_to_dsp_pending.exchange(false, std::memory_order_acquire)) {
-                // Wrap UI data in LV2_Atom_Event and append to sequence
-                p.atom->atom.type = urids_.atom_Sequence;
-                p.atom->atom.size = sizeof(LV2_Atom_Sequence_Body);
-                p.atom->body.unit = 0;
-                p.atom->body.pad = 0;
+            // Drain all pending UI→DSP atom messages from the lock-free ringbuffer.
+            // No heap allocation or mutex on the RT thread.
+            // Reset the input sequence once so appended events accumulate correctly.
+            p.atom->atom.type = urids_.atom_Sequence;
+            p.atom->atom.size = sizeof(LV2_Atom_Sequence_Body);
+            p.atom->body.unit = 0;
+            p.atom->body.pad  = 0;
 
-                std::vector<uint8_t> payload;
-                uint32_t message_type = 0;
-                {
-                    std::lock_guard<std::mutex> lock(p.atom_state->ui_to_dsp_mutex);
-                    payload = p.atom_state->ui_to_dsp;
-                    message_type = p.atom_state->ui_to_dsp_type;
-                }
+            while (p.atom_state->ui_to_dsp &&
+                   lv2_ringbuffer_read_space(p.atom_state->ui_to_dsp) >= sizeof(LV2_Atom)) {
 
-                const uint32_t body_size = static_cast<uint32_t>(payload.size());
-                const uint32_t event_size = static_cast<uint32_t>(sizeof(LV2_Atom_Event)) + body_size;
+                // Peek at the atom header to determine the total message size.
+                LV2_Atom hdr;
+                lv2_ringbuffer_peek(p.atom_state->ui_to_dsp, (char*)&hdr, sizeof(LV2_Atom));
+                const uint32_t total = static_cast<uint32_t>(sizeof(LV2_Atom)) + hdr.size;
+
+                if (lv2_ringbuffer_read_space(p.atom_state->ui_to_dsp) < total)
+                    break; // incomplete write; retry next process cycle
+
+                // Read atom (header + body) directly into the pre-allocated staging buffer.
+                // Layout: [ev->time(8)][ev->body = LV2_Atom(8)][body data(hdr.size)]
+                LV2_Atom_Event* ev = reinterpret_cast<LV2_Atom_Event*>(atom_staging_buf_.data());
+                ev->time.frames = 0;
+                lv2_ringbuffer_read(p.atom_state->ui_to_dsp, (char*)&ev->body, total);
+
+                const uint32_t event_size = static_cast<uint32_t>(sizeof(LV2_Atom_Event)) + hdr.size;
                 const uint32_t max_event_space =
                     (p.atom_buf_size > sizeof(LV2_Atom_Sequence_Body))
-                        ? (p.atom_buf_size - sizeof(LV2_Atom_Sequence_Body))
-                        : 0;
+                        ? (p.atom_buf_size - sizeof(LV2_Atom_Sequence_Body)) : 0U;
 
                 if (event_size > max_event_space) {
                     LOGE("process: dropping oversized UI->DSP atom event (port=%s, event=%u, max=%u)",
@@ -620,25 +683,32 @@ public:
                     continue;
                 }
 
-                std::vector<uint8_t> evbuf(event_size);
-                LV2_Atom_Event* ev = reinterpret_cast<LV2_Atom_Event*>(evbuf.data());
-                
-                ev->time.frames = 0;
-                ev->body.type = message_type;
-                ev->body.size = body_size;
-                if (body_size > 0 && !payload.empty()) {
-                    memcpy((uint8_t*)LV2_ATOM_BODY(&ev->body), payload.data(), body_size);
-                }
-                
                 if (!lv2_atom_sequence_append_event(p.atom, p.atom_buf_size, ev)) {
                     LOGE("process: failed to append UI->DSP atom event (port=%s, body=%u)",
-                         p.symbol.c_str(), body_size);
+                         p.symbol.c_str(), hdr.size);
                 }
             }
         }
 
         // --- Step C: Run plugin ---
         lilv_instance_run(instance_, numFrames);
+
+        // --- Re-interleave: merge per-channel scratch output back into interleaved outputBuffer ---
+        {
+            const int out_ch_count = static_cast<int>(scratch_out_.size());
+            if (out_ch_count == 0) {
+                // Plugin has no audio output ports; pass input through unchanged.
+                std::memcpy(outputBuffer, inputBuffer, sizeof(float) * numFrames * 2);
+            } else {
+                for (int i = 0; i < numFrames; ++i) {
+                    outputBuffer[i * 2]     = scratch_out_[0].data()[i];
+                    // Mono plugin: duplicate to both channels. Stereo: use separate buffers.
+                    outputBuffer[i * 2 + 1] = (out_ch_count > 1)
+                                              ? scratch_out_[1].data()[i]
+                                              : scratch_out_[0].data()[i];
+                }
+            }
+        }
 
         // --- Step D: Deliver worker responses and finalize worker cycle ---
         if (host_worker_.enabled.load(std::memory_order_acquire)) {
@@ -1241,8 +1311,12 @@ private:
 
     // ========== Plugin Instantiation ==========
     bool init_instance() {
+        // Advertise buf_minBlock = 1 so plugins that inspect this option handle
+        // variable-length JACK callbacks correctly (e.g. at transport start/stop).
+        // buf_maxBlock / buf_nominalBlock accurately reflect the JACK buffer size.
+        static const uint32_t kMinBlockLength = 1;
         LV2_Options_Option options[] = {
-            { LV2_OPTIONS_INSTANCE, 0, urids_.buf_minBlock,     sizeof(uint32_t), urids_.atom_Int, &max_block_length_ },
+            { LV2_OPTIONS_INSTANCE, 0, urids_.buf_minBlock,     sizeof(uint32_t), urids_.atom_Int, &kMinBlockLength },
             { LV2_OPTIONS_INSTANCE, 0, urids_.buf_maxBlock,     sizeof(uint32_t), urids_.atom_Int, &max_block_length_ },
             { LV2_OPTIONS_INSTANCE, 0, urids_.buf_nominalBlock, sizeof(uint32_t), urids_.atom_Int, &max_block_length_ },
             { LV2_OPTIONS_INSTANCE, 0, urids_.buf_seqSize,      sizeof(uint32_t), urids_.atom_Int, &required_atom_size_ },
@@ -1559,6 +1633,15 @@ private:
     std::atomic<bool> shutdown_;
     std::atomic<bool> closed_{false};
     std::atomic<bool> worker_stopped{false};
+
+    // Per-channel scratch buffers for de-interleave/re-interleave (allocated in initialize()).
+    // Indexed by audio port order: scratch_in_[0] = first audio input, etc.
+    std::vector<std::vector<float>> scratch_in_;
+    std::vector<std::vector<float>> scratch_out_;
+
+    // Pre-allocated staging buffer for RT atom event assembly in process() Step B.
+    // Layout when used: [LV2_Atom_Event header][atom body bytes]
+    std::vector<uint8_t> atom_staging_buf_;
 };
 
 // ============================================================================

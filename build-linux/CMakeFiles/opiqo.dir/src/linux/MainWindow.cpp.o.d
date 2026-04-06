@@ -905,7 +905,12 @@ CMakeFiles/opiqo.dir/src/linux/MainWindow.cpp.o: \
  /usr/include/gtk-4.0/gtk/gtkwidgetpaintable.h \
  /usr/include/gtk-4.0/gtk/gtkwindowcontrols.h \
  /usr/include/gtk-4.0/gtk/gtkwindowgroup.h \
- /usr/include/gtk-4.0/gtk/gtkwindowhandle.h \
+ /usr/include/gtk-4.0/gtk/gtkwindowhandle.h /usr/include/sys/stat.h \
+ /usr/include/bits/stat.h /usr/include/bits/struct_stat.h \
+ /usr/include/bits/statx.h /usr/include/linux/stat.h \
+ /usr/include/bits/statx-generic.h \
+ /usr/include/bits/types/struct_statx_timestamp.h \
+ /usr/include/bits/types/struct_statx.h \
  /home/djshaji/projects/opiqo-linux/src/linux/AppSettings.h \
  /home/djshaji/projects/opiqo-linux/src/linux/AudioEngine.h \
  /usr/include/c++/16/atomic /usr/include/c++/16/cstdint \
@@ -1018,8 +1023,7 @@ CMakeFiles/opiqo.dir/src/linux/MainWindow.cpp.o: \
  /usr/include/bits/fcntl.h /usr/include/bits/fcntl-linux.h \
  /usr/include/bits/types/struct_iovec.h /usr/include/bits/cloexec.h \
  /usr/include/linux/falloc.h /usr/include/linux/openat2.h \
- /usr/include/bits/openat2.h /usr/include/bits/stat.h \
- /usr/include/bits/struct_stat.h /usr/include/c++/16/fstream \
+ /usr/include/bits/openat2.h /usr/include/c++/16/fstream \
  /usr/include/c++/16/x86_64-redhat-linux/bits/basic_file.h \
  /usr/include/c++/16/x86_64-redhat-linux/bits/c++io.h \
  /usr/include/c++/16/bits/fstream.tcc

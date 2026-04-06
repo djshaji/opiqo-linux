@@ -18,35 +18,18 @@ using json = nlohmann::json;
 
 static const char* kAppCss = R"CSS(
 window {
-    background-color: #1e1e2e;
-    color: #cdd6f4;
 }
 .plugin-slot {
-    border: 1px solid #45475a;
-    border-radius: 6px;
-    margin: 4px;
-    background-color: #181825;
 }
 .slot-header {
-    background-color: #313244;
-    border-radius: 6px 6px 0 0;
-    padding: 2px 4px;
 }
 .slot-name {
-    font-weight: bold;
-    color: #89b4fa;
 }
 .status-label {
-    font-style: italic;
-    color: #a6adc8;
-    font-size: 0.85em;
 }
 .xrun-label {
-    color: #fab387;
-    font-size: 0.85em;
 }
 .plugin-name {
-    font-weight: bold;
 }
 )CSS";
 
@@ -60,7 +43,13 @@ MainWindow::MainWindow(GtkApplication* app) {
     audio_    = std::make_unique<AudioEngine>(engine_.get());
 
     // Scan installed LV2 plugins (relatively slow — do once at startup)
-    engine_->initPlugins();
+    if (! loadPluginCache()) {
+        LOGD("No plugin cache loaded; scanning plugins...");
+        engine_->initPlugins();
+        savePluginCache();
+    } else {
+        LOGD("Plugin cache loaded successfully");
+    }
 
     // Wire JACK hot-plug change notification to re-open settings dialog hint
     portEnum_->setChangeCallback([this]() {
@@ -257,6 +246,11 @@ void MainWindow::onRecordToggled(bool start, int format, int quality) {
 // ── Plugin management ─────────────────────────────────────────────────────────
 
 void MainWindow::onAddPlugin(int slot) {
+    if (audio_->state() != AudioEngine::State::Running) {
+        setStatus("Start the engine before loading plugins");
+        return;
+    }
+
     const json plugins = engine_->getAvailablePlugins();
     if (plugins.empty()) {
         setStatus("No LV2 plugins found. Install plugins and restart.");
@@ -398,4 +392,46 @@ gboolean MainWindow::pollEngineState(gpointer data) {
 void MainWindow::setStatus(const std::string& msg) {
     LOGD("[status] %s", msg.c_str());
     if (controlBar_) controlBar_->setStatusText(msg);
+}
+
+void MainWindow::savePluginCache() const {
+    const json cache = engine_->getAvailablePlugins();
+    const std::string path = std::string (dirname ((char *) AppSettings::configPath().c_str())) + "/opiqo_plugin_cache.json";
+    const char* dir = path.c_str();
+
+    std::string dirPath = std::string(dirname((char*)AppSettings::configPath().c_str()));
+    if (mkdir(dirPath.c_str(), 0755) == -1 && errno != EEXIST) {
+        LOGD("Failed to create cache directory: %s", dirPath.c_str());
+        return;
+    }
+    
+    std::ofstream f(path);
+    if (f.is_open()) {
+        f << cache.dump(4);
+        LOGD("Plugin cache saved to %s", path.c_str());
+    } else {
+        LOGD("Failed to save plugin cache: %s", path.c_str());
+    }
+}
+
+bool MainWindow::loadPluginCache() const {
+    const std::string path = std::string (dirname ((char *)AppSettings::configPath().c_str())) + "/opiqo_plugin_cache.json";
+    std::ifstream f(path);
+    if (!f.is_open()) {
+        LOGD("Plugin cache file not found: %s", path.c_str());
+        return false;
+    }
+    try {
+        json cache;
+        f >> cache;
+        LOGD("Plugin cache loaded from %s", path.c_str());
+        engine_->pluginInfo = cache;  // for inspection via settings dialog
+        lilv_world_load_all(engine_->world);
+        engine_->plugins = lilv_world_get_all_plugins(engine_->world);
+
+        return true;
+    } catch (...) {
+        LOGD("Failed to parse plugin cache file: %s", path.c_str());
+        return false;
+    }
 }

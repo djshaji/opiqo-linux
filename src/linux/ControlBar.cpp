@@ -40,7 +40,7 @@ void ControlBar::buildWidgets() {
     gtk_range_set_value(GTK_RANGE(gainScale_), 1.0);
     gtk_scale_set_draw_value(GTK_SCALE(gainScale_), TRUE);
     gtk_scale_set_value_pos(GTK_SCALE(gainScale_), GTK_POS_RIGHT);
-    gtk_widget_set_size_request(gainScale_, 140, -1);
+    gtk_widget_set_size_request(gainScale_, 300, -1);
     gtk_widget_set_tooltip_text(gainScale_, "Output gain (linear)");
     g_signal_connect_swapped(gainScale_, "value-changed",
                              G_CALLBACK(+[](ControlBar* self) { self->onGainChanged(); }),

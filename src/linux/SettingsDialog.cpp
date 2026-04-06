@@ -1,9 +1,19 @@
 // src/linux/SettingsDialog.cpp
 
 #include "SettingsDialog.h"
+#include "logging_macros.h"
 
 #include <cstdio>
 #include <fstream>
+
+void deletePluginCache () {
+    const std::string path = std::string (g_dirname ((char *)AppSettings::configPath().c_str())) + "/opiqo_plugin_cache.json";
+    if (remove(path.c_str()) == 0) {
+        LOGD("Plugin cache file deleted: %s", path.c_str());
+    } else {
+        LOGD("No plugin cache file to delete at: %s", path.c_str());
+    }
+}
 
 // ── SettingsDialog ────────────────────────────────────────────────────────────
 
@@ -132,6 +142,16 @@ void SettingsDialog::buildAudioTab(GtkWidget* notebook) {
     g_signal_connect_swapped(applyBtn, "clicked",
         G_CALLBACK(+[](SettingsDialog* self) { self->onApply(); }), this);
     gtk_box_append(GTK_BOX(page), applyBtn);
+
+    GtkWidget* sep = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_widget_set_margin_top(sep, 12);
+    gtk_box_append(GTK_BOX(page), sep);
+
+    GtkWidget * deletePluginCacheBtn = gtk_button_new_with_label("Delete Plugin Cache");
+    gtk_widget_set_tooltip_text(deletePluginCacheBtn, "Delete the cached plugin info file (for debugging; the file will be recreated on next app launch)");
+    g_signal_connect_swapped(deletePluginCacheBtn, "clicked",
+        G_CALLBACK(+[](SettingsDialog* self) { deletePluginCache(); }), this);
+    gtk_box_append(GTK_BOX(page), deletePluginCacheBtn);
 
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), page,
                              gtk_label_new("Audio"));

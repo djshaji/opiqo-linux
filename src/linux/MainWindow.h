@@ -10,6 +10,7 @@
 #include <string>
 
 #include <gtk/gtk.h>
+#include <sys/stat.h>
 
 #include "AppSettings.h"
 #include "AudioEngine.h"
@@ -25,7 +26,8 @@ public:
     ~MainWindow();
 
     GtkWidget* window() const { return window_; }
-
+    void savePluginCache () const;  // for debugging: saves plugin info JSON to ~/opiqo_plugin_cache.json
+    bool loadPluginCache () const;  // for debugging: loads plugin info JSON from ~/opiqo_plugin_cache.json (if present) and prints to log
 private:
     // ── Widget construction ───────────────────────────────────────────────
     void buildWidgets();

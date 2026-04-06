@@ -4,41 +4,22 @@
  */
 
 window {
-    background-color: #1e1e2e;
-    color: #cdd6f4;
 }
 
 .plugin-slot {
-    border: 1px solid #45475a;
-    border-radius: 6px;
-    margin: 4px;
-    background-color: #181825;
 }
 
 .slot-header {
-    background-color: #313244;
-    border-radius: 6px 6px 0 0;
-    padding: 2px 4px;
 }
 
 .slot-name {
-    font-weight: bold;
-    color: #89b4fa;
 }
 
 .status-label {
-    font-style: italic;
-    color: #a6adc8;
-    font-size: 0.85em;
 }
 
 .xrun-label {
-    color: #fab387;
-    font-size: 0.85em;
-    margin-right: 8px;
 }
 
 .plugin-name {
-    font-weight: bold;
-    color: #cdd6f4;
 }

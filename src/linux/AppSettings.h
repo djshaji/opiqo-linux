@@ -33,5 +33,7 @@ struct AppSettings {
     void save() const;
 
 private:
+
+public:
     static std::string configPath();
 };

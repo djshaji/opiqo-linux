@@ -896,6 +896,7 @@ CMakeFiles/opiqo.dir/src/linux/SettingsDialog.cpp.o: \
  /usr/include/c++/16/bits/basic_string.tcc \
  /home/djshaji/projects/opiqo-linux/src/linux/AppSettings.h \
  /home/djshaji/projects/opiqo-linux/src/linux/JackPortEnum.h \
+ /home/djshaji/projects/opiqo-linux/src/logging_macros.h \
  /usr/include/c++/16/fstream /usr/include/c++/16/istream \
  /usr/include/c++/16/ios /usr/include/c++/16/exception \
  /usr/include/c++/16/bits/exception_ptr.h \

@@ -901,7 +901,12 @@ CMakeFiles/opiqo.dir/src/main_linux.cpp.o: \
  /usr/include/c++/16/cerrno /usr/include/c++/16/bits/charconv.h \
  /usr/include/c++/16/bits/basic_string.tcc \
  /usr/include/c++/16/bits/memory_resource.h /usr/include/c++/16/cstddef \
- /usr/include/c++/16/bits/uses_allocator_args.h \
+ /usr/include/c++/16/bits/uses_allocator_args.h /usr/include/sys/stat.h \
+ /usr/include/bits/stat.h /usr/include/bits/struct_stat.h \
+ /usr/include/bits/statx.h /usr/include/linux/stat.h \
+ /usr/include/bits/statx-generic.h \
+ /usr/include/bits/types/struct_statx_timestamp.h \
+ /usr/include/bits/types/struct_statx.h \
  /home/djshaji/projects/opiqo-linux/src/linux/AppSettings.h \
  /home/djshaji/projects/opiqo-linux/src/linux/AudioEngine.h \
  /usr/include/c++/16/atomic /usr/include/c++/16/cstdint \

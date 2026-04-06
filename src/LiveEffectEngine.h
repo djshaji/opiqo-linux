@@ -59,7 +59,8 @@ public:
     float * gain = nullptr ;
     int pluginCount = 0 ;
     std::atomic<bool> bypass { false };
-    int blockSize = 4096 ;
+    // 0 = not yet set by the audio backend; AudioEngine::start() writes the real value.
+    int blockSize = 0 ;
 
     void setValue (int p, int index, float value);
     int addPlugin (int position, std::string uri);

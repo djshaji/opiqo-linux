@@ -28,9 +28,13 @@ struct AudioEngine::Impl {
     jack_port_t*   pbkR    = nullptr;
 
     // ── Pre-allocated interleaved stereo work buffers (alloc in start()) ─────
-    // Size: 2 * max_block_frames * sizeof(float)
+    // Size: 2 * block_frames * sizeof(float); reallocated on buffer-size changes.
     std::vector<float> interleavedIn;
     std::vector<float> interleavedOut;
+
+    // ── Pending buffer-size change (written by RT bufferSizeCb, cleared by main) ─
+    // Non-zero means the work buffers are being reallocated; RT thread must passthrough.
+    std::atomic<uint32_t> pendingBufSize_{0};
 
     // ── Error string (written from JACK thread via g_idle_add, read on main) ─
     mutable std::mutex  errMutex;
@@ -52,6 +56,15 @@ struct AudioEngine::Impl {
                          jack_port_get_buffer(d->pbkR, nframes));
 
         if (!inL || !inR || !outL || !outR) return 0;
+
+        // If a buffer-size change is pending, passthrough directly from JACK port
+        // buffers (no interleaved work-buffer access) until the main thread finishes
+        // reallocating interleavedIn/Out.
+        if (d->pendingBufSize_.load(std::memory_order_acquire) != 0) {
+            memcpy(outL, inL, sizeof(float) * nframes);
+            memcpy(outR, inR, sizeof(float) * nframes);
+            return 0;
+        }
 
         const jack_nframes_t n = nframes;
 
@@ -84,9 +97,28 @@ struct AudioEngine::Impl {
     }
 
     static int bufferSizeCb(jack_nframes_t nframes, void* arg) {
-        auto* owner_ptr = static_cast<AudioEngine*>(arg);
-        owner_ptr->blockSize_.store(static_cast<int32_t>(nframes),
-                                    std::memory_order_relaxed);
+        auto* d = static_cast<Impl*>(arg);
+        d->owner->blockSize_.store(static_cast<int32_t>(nframes),
+                                   std::memory_order_relaxed);
+        // Signal RT thread to passthrough while we reallocate on the main thread.
+        d->pendingBufSize_.store(static_cast<uint32_t>(nframes),
+                                 std::memory_order_release);
+        // Marshal the actual heap reallocation to the GTK main thread.
+        g_idle_add([](gpointer data) -> gboolean {
+            auto* d = static_cast<Impl*>(data);
+            const uint32_t newBs = d->pendingBufSize_.load(std::memory_order_relaxed);
+            if (newBs > 0 &&
+                d->owner->state_.load(std::memory_order_acquire) == AudioEngine::State::Running) {
+                const size_t newSamples = static_cast<size_t>(newBs) * 2;
+                d->interleavedIn.assign(newSamples, 0.0f);
+                d->interleavedOut.assign(newSamples, 0.0f);
+                d->engine->blockSize = static_cast<int32_t>(newBs);
+                LOGD("[AudioEngine] work buffers reallocated to %u frames", newBs);
+            }
+            // Release store: RT thread's acquire-load will see the new vector data.
+            d->pendingBufSize_.store(0, std::memory_order_release);
+            return G_SOURCE_REMOVE;
+        }, d);
         return 0;
     }
 
@@ -163,8 +195,7 @@ bool AudioEngine::start(const std::string& capturePort,
     d_->engine->blockSize  = static_cast<int32_t>(bs);
 
     // ── Pre-allocate RT work buffers (zeroed) ─────────────────────────────
-    // max_bs * 2 channels; multiply by 4 to handle temporary blockSize increases
-    const size_t bufSamples = static_cast<size_t>(bs) * 2 * 4;
+    const size_t bufSamples = static_cast<size_t>(bs) * 2;
     d_->interleavedIn.assign( bufSamples, 0.0f);
     d_->interleavedOut.assign(bufSamples, 0.0f);
 
@@ -189,7 +220,7 @@ bool AudioEngine::start(const std::string& capturePort,
     // ── Register callbacks ────────────────────────────────────────────────
     jack_set_process_callback(d_->client,     Impl::processCb,    d_.get());
     jack_set_xrun_callback(d_->client,        Impl::xrunCb,       this);
-    jack_set_buffer_size_callback(d_->client, Impl::bufferSizeCb, this);
+    jack_set_buffer_size_callback(d_->client, Impl::bufferSizeCb, d_.get());
     jack_on_shutdown(d_->client,              Impl::serverLostCb, d_.get());
 
     // ── Activate ──────────────────────────────────────────────────────────

@@ -4418,6 +4418,8 @@ CMakeFiles/opiqo.dir/src/linux/MainWindow.cpp.o: /home/djshaji/projects/opiqo-li
   /usr/include/bits/sigthread.h \
   /usr/include/bits/ss_flags.h \
   /usr/include/bits/stat.h \
+  /usr/include/bits/statx-generic.h \
+  /usr/include/bits/statx.h \
   /usr/include/bits/stdint-intn.h \
   /usr/include/bits/stdint-least.h \
   /usr/include/bits/stdint-uintn.h \
@@ -4460,6 +4462,8 @@ CMakeFiles/opiqo.dir/src/linux/MainWindow.cpp.o: /home/djshaji/projects/opiqo-li
   /usr/include/bits/types/struct_itimerspec.h \
   /usr/include/bits/types/struct_sched_param.h \
   /usr/include/bits/types/struct_sigstack.h \
+  /usr/include/bits/types/struct_statx.h \
+  /usr/include/bits/types/struct_statx_timestamp.h \
   /usr/include/bits/types/struct_timespec.h \
   /usr/include/bits/types/struct_timeval.h \
   /usr/include/bits/types/struct_tm.h \
@@ -5443,6 +5447,7 @@ CMakeFiles/opiqo.dir/src/linux/MainWindow.cpp.o: /home/djshaji/projects/opiqo-li
   /usr/include/linux/openat2.h \
   /usr/include/linux/posix_types.h \
   /usr/include/linux/sched/types.h \
+  /usr/include/linux/stat.h \
   /usr/include/linux/stddef.h \
   /usr/include/linux/types.h \
   /usr/include/locale.h \
@@ -5512,6 +5517,7 @@ CMakeFiles/opiqo.dir/src/linux/MainWindow.cpp.o: /home/djshaji/projects/opiqo-li
   /usr/include/sys/cdefs.h \
   /usr/include/sys/select.h \
   /usr/include/sys/single_threaded.h \
+  /usr/include/sys/stat.h \
   /usr/include/sys/types.h \
   /usr/include/sys/ucontext.h \
   /usr/include/time.h \
@@ -8998,6 +9004,7 @@ CMakeFiles/opiqo.dir/src/linux/SettingsDialog.cpp.o: /home/djshaji/projects/opiq
   /home/djshaji/projects/opiqo-linux/src/linux/AppSettings.h \
   /home/djshaji/projects/opiqo-linux/src/linux/JackPortEnum.h \
   /home/djshaji/projects/opiqo-linux/src/linux/SettingsDialog.h \
+  /home/djshaji/projects/opiqo-linux/src/logging_macros.h \
   /usr/include/alloca.h \
   /usr/include/asm-generic/bitsperlong.h \
   /usr/include/asm-generic/errno-base.h \
@@ -10149,6 +10156,9 @@ CMakeFiles/opiqo.dir/src/main_linux.cpp.o: /home/djshaji/projects/opiqo-linux/sr
   /usr/include/bits/sigstksz.h \
   /usr/include/bits/sigthread.h \
   /usr/include/bits/ss_flags.h \
+  /usr/include/bits/stat.h \
+  /usr/include/bits/statx-generic.h \
+  /usr/include/bits/statx.h \
   /usr/include/bits/stdint-intn.h \
   /usr/include/bits/stdint-least.h \
   /usr/include/bits/stdint-uintn.h \
@@ -10158,6 +10168,7 @@ CMakeFiles/opiqo.dir/src/main_linux.cpp.o: /home/djshaji/projects/opiqo-linux/sr
   /usr/include/bits/stdlib-float.h \
   /usr/include/bits/struct_mutex.h \
   /usr/include/bits/struct_rwlock.h \
+  /usr/include/bits/struct_stat.h \
   /usr/include/bits/thread-shared-types.h \
   /usr/include/bits/time.h \
   /usr/include/bits/time64.h \
@@ -10189,6 +10200,8 @@ CMakeFiles/opiqo.dir/src/main_linux.cpp.o: /home/djshaji/projects/opiqo-linux/sr
   /usr/include/bits/types/struct_itimerspec.h \
   /usr/include/bits/types/struct_sched_param.h \
   /usr/include/bits/types/struct_sigstack.h \
+  /usr/include/bits/types/struct_statx.h \
+  /usr/include/bits/types/struct_statx_timestamp.h \
   /usr/include/bits/types/struct_timespec.h \
   /usr/include/bits/types/struct_timeval.h \
   /usr/include/bits/types/struct_tm.h \
@@ -11165,6 +11178,7 @@ CMakeFiles/opiqo.dir/src/main_linux.cpp.o: /home/djshaji/projects/opiqo-linux/sr
   /usr/include/linux/limits.h \
   /usr/include/linux/posix_types.h \
   /usr/include/linux/sched/types.h \
+  /usr/include/linux/stat.h \
   /usr/include/linux/stddef.h \
   /usr/include/linux/types.h \
   /usr/include/locale.h \
@@ -11234,6 +11248,7 @@ CMakeFiles/opiqo.dir/src/main_linux.cpp.o: /home/djshaji/projects/opiqo-linux/sr
   /usr/include/sys/cdefs.h \
   /usr/include/sys/select.h \
   /usr/include/sys/single_threaded.h \
+  /usr/include/sys/stat.h \
   /usr/include/sys/types.h \
   /usr/include/sys/ucontext.h \
   /usr/include/time.h \

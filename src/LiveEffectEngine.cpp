@@ -105,6 +105,14 @@ void LiveEffectEngine::setValue (int p, int index, float value) {
 }
 
 int LiveEffectEngine::addPlugin (int position, std::string uri) {
+    // Refuse to instantiate plugins before the audio engine has started.
+    // LV2 plugins size their internal buffers from max_block_length; an incorrect
+    // value (especially 0) will produce wrong behaviour or crashes at runtime.
+    if (blockSize <= 0) {
+        LOGE("addPlugin: blockSize is %d — start the audio engine before loading plugins", blockSize);
+        return -1;
+    }
+
     bypass = true ;
 
     const char* uriChars = uri.c_str();
