@@ -1,1 +1,0 @@
-# opiqo-linux
