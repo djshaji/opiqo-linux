@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+ee7d0f4d9af34e47d55951115a9a1459 opiqo_resources.c

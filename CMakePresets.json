@@ -1,0 +1,34 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "linux-default",
+      "displayName": "Linux Release (GTK4 + JACK)",
+      "binaryDir": "${sourceDir}/build-linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "OPIQO_TARGET_PLATFORM": "linux"
+      }
+    },
+    {
+      "name": "linux-debug",
+      "displayName": "Linux Debug (GTK4 + JACK)",
+      "binaryDir": "${sourceDir}/build-linux-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OPIQO_TARGET_PLATFORM": "linux"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux-default",
+      "configurePreset": "linux-default"
+    },
+    {
+      "name": "linux-debug",
+      "configurePreset": "linux-debug"
+    }
+  ]
+}
