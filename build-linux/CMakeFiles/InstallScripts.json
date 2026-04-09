@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/djshaji/projects/opiqo-linux/build-linux/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

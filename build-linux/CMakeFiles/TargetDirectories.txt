@@ -1,7 +1,0 @@
-/home/djshaji/projects/opiqo-linux/build-linux/CMakeFiles/opiqo.dir
-/home/djshaji/projects/opiqo-linux/build-linux/CMakeFiles/edit_cache.dir
-/home/djshaji/projects/opiqo-linux/build-linux/CMakeFiles/rebuild_cache.dir
-/home/djshaji/projects/opiqo-linux/build-linux/CMakeFiles/list_install_components.dir
-/home/djshaji/projects/opiqo-linux/build-linux/CMakeFiles/install.dir
-/home/djshaji/projects/opiqo-linux/build-linux/CMakeFiles/install/local.dir
-/home/djshaji/projects/opiqo-linux/build-linux/CMakeFiles/install/strip.dir
