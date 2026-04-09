@@ -1,4 +1,4 @@
-// src/linux/AudioEngine.cpp
+// src/gtk4/AudioEngine.cpp
 
 #include "AudioEngine.h"
 #include "LiveEffectEngine.h"

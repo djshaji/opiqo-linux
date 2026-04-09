@@ -1,4 +1,4 @@
-// src/linux/JackPortEnum.h
+// src/gtk4/JackPortEnum.h
 // Discovers physical JACK capture/playback ports and watches for hot-plug events.
 // Opens a short-lived JACK client for probing; does NOT own the audio pipeline.
 

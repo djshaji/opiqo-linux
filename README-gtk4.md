@@ -93,7 +93,7 @@ on classic JACK2 and on modern PipeWire via `pipewire-jack`.
 
 **Thin adapter pattern** — The DSP core (`LiveEffectEngine`, `LV2Plugin`,
 `FileWriter`, `LockFreeQueue`) is shared verbatim with the Android and Windows
-builds. Only `src/linux/` and `src/main_linux.cpp` are Linux-specific.
+builds. Only `src/gtk4/` and `src/main_linux.cpp` are Linux-specific.
 
 **Lock-free RT boundary** — `AudioEngine` pre-allocates interleaved stereo
 buffers in `start()` and makes zero heap allocations inside the JACK callback.

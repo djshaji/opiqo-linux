@@ -1,4 +1,4 @@
-// src/linux/PluginDialog.h
+// src/gtk4/PluginDialog.h
 // Modal plugin browser dialog backed by LiveEffectEngine::getAvailablePlugins().
 // Provides a searchable list of installed LV2 plugins.
 

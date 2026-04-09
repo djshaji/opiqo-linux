@@ -1,4 +1,4 @@
-// src/linux/PluginSlot.cpp
+// src/gtk4/PluginSlot.cpp
 
 #include "PluginSlot.h"
 

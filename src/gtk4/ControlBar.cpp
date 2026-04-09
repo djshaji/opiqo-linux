@@ -1,4 +1,4 @@
-// src/linux/ControlBar.cpp
+// src/gtk4/ControlBar.cpp
 
 #include "ControlBar.h"
 

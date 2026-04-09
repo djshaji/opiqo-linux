@@ -1,4 +1,4 @@
-// src/linux/PluginDialog.cpp
+// src/gtk4/PluginDialog.cpp
 
 #include "PluginDialog.h"
 

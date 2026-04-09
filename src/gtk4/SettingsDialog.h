@@ -1,4 +1,4 @@
-// src/linux/SettingsDialog.h
+// src/gtk4/SettingsDialog.h
 // Two-tab dialog: Audio (JACK port selection) and Presets (export / import).
 
 #pragma once

@@ -1,4 +1,4 @@
-// src/linux/AppSettings.h
+// src/gtk4/AppSettings.h
 // XDG-compliant user preference storage for Opiqo.
 // All fields carry safe defaults so the app starts cleanly without any saved config.
 

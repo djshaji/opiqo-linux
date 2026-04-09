@@ -1,4 +1,4 @@
-// src/linux/AudioEngine.h
+// src/gtk4/AudioEngine.h
 // JACK client lifecycle + real-time DSP dispatch for Opiqo.
 //
 // Thread ownership:

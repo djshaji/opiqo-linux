@@ -1,4 +1,4 @@
-// src/linux/ControlBar.h
+// src/gtk4/ControlBar.h
 // Bottom control bar: Power toggle, Gain slider, Record toggle, Format/Quality dropdowns.
 // All callbacks run on the GTK main thread.
 

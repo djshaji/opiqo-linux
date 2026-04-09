@@ -45,7 +45,7 @@ platform and UI layers need a new Linux-specific implementation.
 
 ## 3. Source Layout
 
-New files are placed in `src/linux/` to mirror `src/win32/`.
+New files are placed in `src/gtk4/` to mirror `src/win32/`.
 
 ```
 src/
@@ -108,15 +108,15 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux")
 
   add_executable(opiqo
     src/main_linux.cpp
-    src/linux/AppSettings.cpp
-    src/linux/AudioEngine.cpp
-    src/linux/JackPortEnum.cpp
-    src/linux/MainWindow.cpp
-    src/linux/ControlBar.cpp
-    src/linux/PluginSlot.cpp
-    src/linux/PluginDialog.cpp
-    src/linux/ParameterPanel.cpp
-    src/linux/SettingsDialog.cpp
+    src/gtk4/AppSettings.cpp
+    src/gtk4/AudioEngine.cpp
+    src/gtk4/JackPortEnum.cpp
+    src/gtk4/MainWindow.cpp
+    src/gtk4/ControlBar.cpp
+    src/gtk4/PluginSlot.cpp
+    src/gtk4/PluginDialog.cpp
+    src/gtk4/ParameterPanel.cpp
+    src/gtk4/SettingsDialog.cpp
     src/LiveEffectEngine.cpp
     src/FileWriter.cpp
     src/LockFreeQueue.cpp
@@ -124,7 +124,7 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux")
 
   target_include_directories(opiqo PRIVATE
     ${GTK3_INCLUDE_DIRS} ${JACK_INCLUDE_DIRS} ${LILV_INCLUDE_DIRS}
-    ${SNDFILE_INCLUDE_DIRS} src/ src/linux/
+    ${SNDFILE_INCLUDE_DIRS} src/ src/gtk4/
   )
 
   target_link_libraries(opiqo PRIVATE
@@ -184,7 +184,7 @@ cmake --build build-linux -j$(nproc)
 - Add the `if(OPIQO_TARGET_PLATFORM STREQUAL "linux")` block to `CMakeLists.txt`.
 - Create `src/main_linux.cpp` with a `GtkApplication` that opens a blank
   `GtkApplicationWindow` (requires GTK3 ≥ 3.4 for `GtkApplication`).
-- Add stub header/source files for all `src/linux/` modules.
+- Add stub header/source files for all `src/gtk4/` modules.
 
 **Deliverables:** `build-linux/opiqo` binary that opens an empty GTK3 window.
 
@@ -539,12 +539,12 @@ GtkFrame
 | File group | New files |
 |---|---|
 | App entry | `src/main_linux.cpp` |
-| Audio platform | `src/linux/AudioEngine.h/.cpp`, `src/linux/JackPortEnum.h/.cpp` |
-| Settings | `src/linux/AppSettings.h/.cpp` |
-| UI shell | `src/linux/MainWindow.h/.cpp`, `src/linux/ControlBar.h/.cpp` |
-| Plugin UX | `src/linux/PluginSlot.h/.cpp`, `src/linux/PluginDialog.h/.cpp`, `src/linux/ParameterPanel.h/.cpp` |
-| Settings dialog | `src/linux/SettingsDialog.h/.cpp` |
-| UI resources | `src/linux/ui/main_window.ui`, `src/linux/ui/plugin_slot.ui`, `src/linux/opiqo.css`, `src/linux/opiqo.gresource.xml` |
+| Audio platform | `src/gtk4/AudioEngine.h/.cpp`, `src/gtk4/JackPortEnum.h/.cpp` |
+| Settings | `src/gtk4/AppSettings.h/.cpp` |
+| UI shell | `src/gtk4/MainWindow.h/.cpp`, `src/gtk4/ControlBar.h/.cpp` |
+| Plugin UX | `src/gtk4/PluginSlot.h/.cpp`, `src/gtk4/PluginDialog.h/.cpp`, `src/gtk4/ParameterPanel.h/.cpp` |
+| Settings dialog | `src/gtk4/SettingsDialog.h/.cpp` |
+| UI resources | `src/gtk4/ui/main_window.ui`, `src/gtk4/ui/plugin_slot.ui`, `src/gtk4/opiqo.css`, `src/gtk4/opiqo.gresource.xml` |
 | Build | `CMakePresets.json` (new preset), `CMakeLists.txt` (new target block) |
 
 ---

@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 
-#include "linux/MainWindow.h"
+#include "gtk4/MainWindow.h"
 
 // One MainWindow per application lifetime
 static MainWindow* g_mainWindow = nullptr;

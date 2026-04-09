@@ -1,4 +1,4 @@
-// src/linux/ParameterPanel.cpp
+// src/gtk4/ParameterPanel.cpp
 
 #include "ParameterPanel.h"
 

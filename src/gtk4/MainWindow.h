@@ -1,4 +1,4 @@
-// src/linux/MainWindow.h
+// src/gtk4/MainWindow.h
 // Top-level application window.
 // Owns: LiveEffectEngine, AudioEngine, JackPortEnum, AppSettings,
 //       ControlBar, 4 × PluginSlot, SettingsDialog.

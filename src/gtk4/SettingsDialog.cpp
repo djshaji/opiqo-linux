@@ -1,4 +1,4 @@
-// src/linux/SettingsDialog.cpp
+// src/gtk4/SettingsDialog.cpp
 
 #include "SettingsDialog.h"
 #include "logging_macros.h"

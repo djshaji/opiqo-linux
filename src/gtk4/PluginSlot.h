@@ -1,4 +1,4 @@
-// src/linux/PluginSlot.h
+// src/gtk4/PluginSlot.h
 // One of the four plugin slots in the 2×2 grid.
 // Contains a header row (name, +, Bypass, ×) and a ParameterPanel.
 

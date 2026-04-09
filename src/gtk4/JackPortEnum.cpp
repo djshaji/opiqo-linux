@@ -1,4 +1,4 @@
-// src/linux/JackPortEnum.cpp
+// src/gtk4/JackPortEnum.cpp
 
 #include "JackPortEnum.h"
 

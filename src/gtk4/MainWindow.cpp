@@ -1,4 +1,4 @@
-// src/linux/MainWindow.cpp
+// src/gtk4/MainWindow.cpp
 
 #include "MainWindow.h"
 

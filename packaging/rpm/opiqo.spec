@@ -22,10 +22,12 @@ BuildRequires:  pkgconfig(ogg)
 BuildRequires:  pkgconfig(vorbis)
 BuildRequires:  pkgconfig(vorbisenc)
 BuildRequires:  pkgconfig(opus)
-BuildRequires:  pkgconfig(opusenc)
+BuildRequires:  pkgconfig(libopusenc)
 BuildRequires:  lame-devel
 BuildRequires:  flac-devel
 BuildRequires:  glib2-devel
+BuildRequires:  libasan
+BuildRequires:  libubsan
 
 %description
 Opiqo is a real-time LV2 plugin host for Linux with a GTK4 user interface

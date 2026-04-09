@@ -1,4 +1,4 @@
-// src/linux/ParameterPanel.h
+// src/gtk4/ParameterPanel.h
 // Dynamically builds GTK4 controls from LV2Plugin::PortInfo.
 // Contained inside a GtkScrolledWindow; rebuilt whenever a plugin is loaded/removed.
 

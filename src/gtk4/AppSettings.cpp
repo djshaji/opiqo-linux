@@ -1,4 +1,4 @@
-// src/linux/AppSettings.cpp
+// src/gtk4/AppSettings.cpp
 
 #include "AppSettings.h"
 #include "json.hpp"

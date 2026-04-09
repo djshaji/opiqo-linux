@@ -25,7 +25,7 @@ platform and UI layers need a new Linux-specific implementation.
 | Concern | Windows | Linux |
 |---------|---------|-------|
 | UI toolkit | Win32 API | Xlib (libX11) + Xft (font rendering) |
-| Widget layer | Win32 controls | Hand-built widget toolkit (`src/linux/ui/`) |
+| Widget layer | Win32 controls | Hand-built widget toolkit (`src/gtk4/ui/`) |
 | Drawing | GDI | Xlib GC primitives + XFT text |
 | Audio backend | WASAPI | JACK (libjack2) |
 | Device discovery | IMMDeviceEnumerator (COM) | `jack_get_ports()` |
@@ -57,7 +57,7 @@ platform and UI layers need a new Linux-specific implementation.
 ## 3. Custom Widget Layer Design
 
 Xlib has no built-in widgets.  A minimal toolkit must be implemented in
-`src/linux/ui/` before any application-level UI work begins.
+`src/gtk4/ui/` before any application-level UI work begins.
 
 ### Widget hierarchy
 
@@ -78,7 +78,7 @@ Widget (base)
   ListView      ← scrollable item list with keyboard navigation
 ```
 
-### Widget base interface (`src/linux/ui/Widget.h`)
+### Widget base interface (`src/gtk4/ui/Widget.h`)
 
 ```cpp
 struct Rect { int x, y, w, h; };
@@ -199,19 +199,19 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux-xlib")
   pkg_check_modules(LILV    REQUIRED lilv-0)
   pkg_check_modules(SNDFILE REQUIRED sndfile)
 
-  file(GLOB UI_SOURCES src/linux/ui/*.cpp)
+  file(GLOB UI_SOURCES src/gtk4/ui/*.cpp)
 
   add_executable(opiqo
     src/main_linux.cpp
-    src/linux/AppSettings.cpp
-    src/linux/AudioEngine.cpp
-    src/linux/JackPortEnum.cpp
-    src/linux/MainWindow.cpp
-    src/linux/ControlBar.cpp
-    src/linux/PluginSlot.cpp
-    src/linux/PluginDialog.cpp
-    src/linux/ParameterPanel.cpp
-    src/linux/SettingsDialog.cpp
+    src/gtk4/AppSettings.cpp
+    src/gtk4/AudioEngine.cpp
+    src/gtk4/JackPortEnum.cpp
+    src/gtk4/MainWindow.cpp
+    src/gtk4/ControlBar.cpp
+    src/gtk4/PluginSlot.cpp
+    src/gtk4/PluginDialog.cpp
+    src/gtk4/ParameterPanel.cpp
+    src/gtk4/SettingsDialog.cpp
     src/LiveEffectEngine.cpp
     src/FileWriter.cpp
     src/LockFreeQueue.cpp
@@ -221,7 +221,7 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux-xlib")
   target_include_directories(opiqo PRIVATE
     ${X11_INCLUDE_DIRS} ${XFT_INCLUDE_DIRS} ${XRENDER_INCLUDE_DIRS}
     ${XEXT_INCLUDE_DIRS} ${JACK_INCLUDE_DIRS} ${LILV_INCLUDE_DIRS}
-    ${SNDFILE_INCLUDE_DIRS} src/ src/linux/ src/linux/ui/
+    ${SNDFILE_INCLUDE_DIRS} src/ src/gtk4/ src/gtk4/ui/
   )
 
   target_link_libraries(opiqo PRIVATE
@@ -718,12 +718,12 @@ while (running) {
 | File group | New files |
 |---|---|
 | App entry | `src/main_linux.cpp` |
-| Widget toolkit | `src/linux/ui/Widget.h/.cpp`, `Button`, `ToggleButton`, `Label`, `HSlider`, `ComboBox`, `Frame`, `VBox.h`, `HBox.h`, `Table`, `ScrollView`, `TextEntry`, `Dialog`, `ListView`, `Theme` |
-| Audio platform | `src/linux/AudioEngine.h/.cpp`, `src/linux/JackPortEnum.h/.cpp` |
-| Settings | `src/linux/AppSettings.h/.cpp` |
-| UI shell | `src/linux/MainWindow.h/.cpp`, `src/linux/ControlBar.h/.cpp` |
-| Plugin UX | `src/linux/PluginSlot.h/.cpp`, `src/linux/PluginDialog.h/.cpp`, `src/linux/ParameterPanel.h/.cpp` |
-| Settings dialog | `src/linux/SettingsDialog.h/.cpp` |
+| Widget toolkit | `src/gtk4/ui/Widget.h/.cpp`, `Button`, `ToggleButton`, `Label`, `HSlider`, `ComboBox`, `Frame`, `VBox.h`, `HBox.h`, `Table`, `ScrollView`, `TextEntry`, `Dialog`, `ListView`, `Theme` |
+| Audio platform | `src/gtk4/AudioEngine.h/.cpp`, `src/gtk4/JackPortEnum.h/.cpp` |
+| Settings | `src/gtk4/AppSettings.h/.cpp` |
+| UI shell | `src/gtk4/MainWindow.h/.cpp`, `src/gtk4/ControlBar.h/.cpp` |
+| Plugin UX | `src/gtk4/PluginSlot.h/.cpp`, `src/gtk4/PluginDialog.h/.cpp`, `src/gtk4/ParameterPanel.h/.cpp` |
+| Settings dialog | `src/gtk4/SettingsDialog.h/.cpp` |
 | Build | `CMakePresets.json` (`linux-xlib` preset), `CMakeLists.txt` (new target block) |
 
 ---
