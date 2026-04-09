@@ -5,6 +5,38 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_program(GIT_EXECUTABLE git REQUIRED)
+find_program(RPMBUILD_EXECUTABLE rpmbuild REQUIRED)
+
+# Enable debug symbols
+add_compile_options(-g)
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+
+set(OPIQO_RPM_TOPDIR "${CMAKE_SOURCE_DIR}/packaging/rpm")
+set(OPIQO_RPM_TARBALL "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz")
+set(OPIQO_RPM_SPEC_SRC "${OPIQO_RPM_TOPDIR}/opiqo.spec")
+set(OPIQO_RPM_SPEC_DST "${OPIQO_RPM_TOPDIR}/SPECS/opiqo.spec")
+
+add_custom_target(srpm
+  COMMAND ${CMAKE_COMMAND} -E make_directory
+    "${OPIQO_RPM_TOPDIR}/BUILD"
+    "${OPIQO_RPM_TOPDIR}/BUILDROOT"
+    "${OPIQO_RPM_TOPDIR}/RPMS"
+    "${OPIQO_RPM_TOPDIR}/SOURCES"
+    "${OPIQO_RPM_TOPDIR}/SPECS"
+    "${OPIQO_RPM_TOPDIR}/SRPMS"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OPIQO_RPM_SPEC_SRC}" "${OPIQO_RPM_SPEC_DST}"
+  COMMAND ${GIT_EXECUTABLE} archive --format=tar.gz
+    --prefix=${PROJECT_NAME}-${PROJECT_VERSION}/
+    -o "${OPIQO_RPM_TARBALL}" HEAD
+  COMMAND ${RPMBUILD_EXECUTABLE} -bs
+    --define "_topdir ${OPIQO_RPM_TOPDIR}"
+    "${OPIQO_RPM_SPEC_DST}"
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  COMMENT "Building source RPM in ${OPIQO_RPM_TOPDIR}/SRPMS"
+  VERBATIM
+)
+
 # ─── Linux / GTK4 / JACK target ──────────────────────────────────────────────
 if(OPIQO_TARGET_PLATFORM STREQUAL "linux")
 

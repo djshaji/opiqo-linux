@@ -1,2 +1,17 @@
-build-linux/
-build-linux/CMakeFiles/opiqo.dir/src/LiveEffectEngine.cpp.o
+build-*/
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Build outputs
+opiqo
+*.o
+*.obj
+*.so
+
+# RPM build tree outputs (keep spec file tracked)
+packaging/rpm/*
+!packaging/rpm/opiqo.spec
