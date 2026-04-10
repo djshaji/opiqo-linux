@@ -37,11 +37,18 @@
 #include <lv2/state/state.h>
 #include <lv2/resize-port/resize-port.h>
 #include <lv2/midi/midi.h>
+#include <lv2/uri-map/uri-map.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#include <lv2/event/event.h>
+#pragma GCC diagnostic pop
 
 #include <atomic>
 #include <algorithm>
+#include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <dlfcn.h>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -484,6 +491,7 @@ public:
         audio_class_ = lilv_new_uri(world_, LV2_CORE__AudioPort);
         control_class_ = lilv_new_uri(world_, LV2_CORE__ControlPort);
         atom_class_ = lilv_new_uri(world_, LV2_ATOM__AtomPort);
+        event_class_ = lilv_new_uri(world_, LV2_EVENT_URI "#EventPort");
         input_class_ = lilv_new_uri(world_, LV2_CORE__InputPort);
         rsz_minimumSize_ = lilv_new_uri(world_, LV2_RESIZE_PORT__minimumSize);
 
@@ -549,6 +557,31 @@ public:
 
         if (instance_) {
             lilv_instance_deactivate(instance_);
+
+            // Some plugins (e.g. Calf Vinyl, Calf Wavetable) spawn their own
+            // pthreads internally, independent of the LV2 Worker extension.
+            // lilv_instance_free() calls dlclose() which unmaps the plugin DSO.
+            // If any plugin-internal thread is still running at that point, the
+            // unmapped code pages cause a SIGSEGV.
+            //
+            // Fix: open the plugin library with RTLD_NODELETE before freeing the
+            // instance.  This pins the DSO in memory permanently — subsequent
+            // dlclose() calls decrement the reference count but never actually
+            // unmap the code, so plugin-internal threads can run to completion
+            // safely.  The small permanent mapping is an acceptable trade-off.
+            if (plugin_) {
+                const LilvNode* lib_node = lilv_plugin_get_library_uri(plugin_);
+                if (lib_node) {
+                    char* lib_path = lilv_file_uri_parse(lilv_node_as_uri(lib_node), nullptr);
+                    if (lib_path) {
+                        dlopen(lib_path, RTLD_LAZY | RTLD_NODELETE);
+                        // Intentionally not closing the returned handle —
+                        // RTLD_NODELETE makes the mapping permanent.
+                        lilv_free(lib_path);
+                    }
+                }
+            }
+
             lilv_instance_free(instance_);
             instance_ = nullptr;
         }
@@ -561,6 +594,7 @@ public:
             if (p.atom) free(p.atom);
 #endif
             delete p.atom_state;
+            if (p.event_buf_raw) { free(p.event_buf_raw); p.event_buf_raw = nullptr; }
         }
         ports_.clear();
         scratch_in_.clear();
@@ -584,6 +618,10 @@ public:
         if (atom_class_) {
             lilv_node_free(atom_class_);
             atom_class_ = nullptr;
+        }
+        if (event_class_) {
+            lilv_node_free(event_class_);
+            event_class_ = nullptr;
         }
         if (input_class_) {
             lilv_node_free(input_class_);
@@ -751,9 +789,19 @@ public:
                     }
                 }
                 
-                // Reset output buffer for next process cycle
+                // Reset output buffer for next process cycle, restoring full capacity.
                 p.atom->atom.type = 0;
-                p.atom->atom.size = required_atom_size_;
+                p.atom->atom.size = p.atom_buf_size - sizeof(LV2_Atom);
+            }
+
+            // Reset old-style event input port for next cycle
+            if (p.is_event && !p.is_atom && p.is_input && p.event_buf_raw) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+                auto* evbuf = reinterpret_cast<LV2_Event_Buffer*>(p.event_buf_raw);
+                evbuf->event_count = 0;
+                evbuf->size = 0;
+#pragma GCC diagnostic pop
             }
         }
 
@@ -1115,7 +1163,13 @@ private:
         LV2_Feature make_path_feature;
         LV2_Feature free_path_feature;
         LV2_Feature bbl_feature;
+        LV2_Feature uri_map_f;
     } features_;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    LV2_URI_Map_Feature uri_map_data_;
+#pragma GCC diagnostic pop
 
     static char* make_path_func(LV2_State_Make_Path_Handle, const char* path) {
         return strdup(path);
@@ -1144,6 +1198,20 @@ private:
 
         features_.bbl_feature.URI = LV2_BUF_SIZE__boundedBlockLength;
         features_.bbl_feature.data = nullptr;
+
+        // Legacy uri-map feature (deprecated, but required by old lv2-c++-tools plugins
+        // such as ll-plugins arpeggiator, sineshaper, etc.).  They call uri_to_id() at
+        // instantiation time without declaring it in their required-features manifest.
+        // We implement it using our URID map so they get valid IDs instead of crashing.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+        uri_map_data_.callback_data = this;
+        uri_map_data_.uri_to_id = [](LV2_URI_Map_Callback_Data data, const char*, const char* uri) -> uint32_t {
+            return static_cast<LV2Plugin*>(data)->map_uri(uri);
+        };
+        features_.uri_map_f.URI = LV2_URI_MAP_URI;
+        features_.uri_map_f.data = &uri_map_data_;
+#pragma GCC diagnostic pop
 
         features_.um_f.URI = LV2_URID__map;
         features_.um_f.data = &um_;
@@ -1244,12 +1312,14 @@ private:
             p.is_audio = lilv_port_is_a(plugin_, lp, audio_class_);
             p.is_control = lilv_port_is_a(plugin_, lp, control_class_);
             p.is_atom = lilv_port_is_a(plugin_, lp, atom_class_);
+            p.is_event = event_class_ ? lilv_port_is_a(plugin_, lp, event_class_) : false;
             p.is_input = lilv_port_is_a(plugin_, lp, input_class_);
             p.is_midi = lilv_port_supports_event(plugin_, lp, midi_event);
             p.control = 0.0f;
             p.defvalue = 0.0f;
             p.atom = nullptr;
             p.atom_state = nullptr;
+            p.event_buf_raw = nullptr;
 
             // Allocate and initialize atom ports
             if (p.is_atom) {
@@ -1263,10 +1333,30 @@ private:
                     p.atom->body.unit = 0;
                     p.atom->body.pad = 0;
                 } else {
-                    p.atom->atom.size = 0;
+                    // Output ports: LV2 spec requires the host to set atom.size to the
+                    // available capacity so the plugin knows how many bytes it can write.
+                    p.atom->atom.size = p.atom_buf_size - sizeof(LV2_Atom);
                 }
 
                 p.atom_state = new AtomState();
+            }
+
+            // Allocate a minimal event buffer for old-style lv2:EventPort.
+            // These ports predate atom:AtomPort. We provide an empty buffer so the
+            // plugin can iterate events safely and write output events without crashing.
+            if (p.is_event && !p.is_atom) {
+                static const uint32_t EVENT_BUF_DATA_SIZE = 4096;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+                p.event_buf_raw = (uint8_t*)calloc(sizeof(LV2_Event_Buffer) + EVENT_BUF_DATA_SIZE, 1);
+                auto* evbuf = reinterpret_cast<LV2_Event_Buffer*>(p.event_buf_raw);
+                evbuf->data       = p.event_buf_raw + sizeof(LV2_Event_Buffer);
+                evbuf->header_size = sizeof(LV2_Event_Buffer);
+                evbuf->stamp_type  = LV2_EVENT_AUDIO_STAMP;
+                evbuf->event_count = 0;
+                evbuf->capacity    = EVENT_BUF_DATA_SIZE;
+                evbuf->size        = 0;
+#pragma GCC diagnostic pop
             }
 
             // Extract default values for control inputs
@@ -1302,11 +1392,15 @@ private:
         const LilvPort* lilv_port = nullptr;
         bool is_audio = false, is_input = false, is_control = false;
         bool is_atom = false, is_midi = false;
+        bool is_event = false;   // old lv2:EventPort (deprecated, pre-atom)
 
         float control = 0.0f, defvalue = 0.0f;
         LV2_Atom_Sequence* atom = nullptr;
         uint32_t atom_buf_size = 8192;
         AtomState* atom_state = nullptr;
+
+        // For old EventPort: a self-contained buffer (LV2_Event_Buffer header + data).
+        uint8_t* event_buf_raw = nullptr;
     };
 
     // ========== Plugin Instantiation ==========
@@ -1340,7 +1434,8 @@ private:
         }
 
         LV2_Feature* feats[] = { &features_.um_f, &features_.unm_f, &opt_f,
-                    &features_.bbl_feature, &features_.map_path_feature,
+                    &features_.bbl_feature, &features_.uri_map_f,
+                    &features_.map_path_feature,
                     &features_.make_path_feature, &features_.free_path_feature,
                     &host_worker_.feature, nullptr };
 
@@ -1393,9 +1488,10 @@ private:
             }
             if (p.is_atom)
                 lilv_instance_connect_port(instance_, p.index, p.atom);
-            if (! p.is_atom and ! p.is_control) {
-//                lilv_instance_connect_port(instance_, p.index, nullptr);
-                LOGE ("[%s] Warning: Unconnected port %u (not control or atom)", lilv_node_as_string(lilv_plugin_get_name(plugin_)), p.index);
+            if (p.is_event && !p.is_atom && p.event_buf_raw)
+                lilv_instance_connect_port(instance_, p.index, p.event_buf_raw);
+            if (!p.is_atom && !p.is_control && !p.is_event) {
+                lilv_instance_connect_port(instance_, p.index, nullptr);
             }
         }
 
@@ -1616,7 +1712,7 @@ private:
     LilvWorld* world_;
     LilvInstance* instance_;
 
-    LilvNode *audio_class_, *control_class_, *atom_class_, *input_class_, *rsz_minimumSize_;
+    LilvNode *audio_class_, *control_class_, *atom_class_, *event_class_, *input_class_, *rsz_minimumSize_;
 
     double sample_rate_;
     uint32_t max_block_length_;

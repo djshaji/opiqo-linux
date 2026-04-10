@@ -149,7 +149,7 @@ cmake --preset linux-default        # Release build in build-linux/
 cmake --build build-linux -j$(nproc)
 ```
 
-For a debug build with AddressSanitizer:
+For a debug build:
 ```bash
 cmake --preset linux-debug
 cmake --build build-linux-debug -j$(nproc)

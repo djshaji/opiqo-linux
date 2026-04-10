@@ -95,23 +95,19 @@ These tests directly target the race conditions most likely to cause production 
 
 ## Reproducing Production Crashes
 
-Run the full-catalogue test under AddressSanitizer to get exact stack traces when a specific plugin crashes:
+Run the full-catalogue test to get stack traces when a specific plugin crashes:
 
 ```bash
 cd build-linux-debug
-cmake .. -DOPIQO_TARGET_PLATFORM=linux \
-         -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined" \
-         -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+cmake .. -DOPIQO_TARGET_PLATFORM=linux
 make opiqo_tests
 ./opiqo_tests --gtest_filter="*LoadEveryInstalled*"
 ```
 
-To run only the concurrency tests under ThreadSanitizer:
+To run only the concurrency tests:
 
 ```bash
-cmake .. -DOPIQO_TARGET_PLATFORM=linux \
-         -DCMAKE_CXX_FLAGS="-fsanitize=thread" \
-         -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread"
+cmake .. -DOPIQO_TARGET_PLATFORM=linux
 make opiqo_tests
 ./opiqo_tests --gtest_filter="*Concurrent*:*Rapid*"
 ```

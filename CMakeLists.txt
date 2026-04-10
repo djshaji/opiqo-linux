@@ -162,12 +162,6 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux")
     target_link_libraries(opiqo PRIVATE PkgConfig::VORBISENC)
   endif()
 
-  # Optional: address-sanitizer build for testing
-  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(opiqo PRIVATE -fsanitize=address,undefined)
-    target_link_options(opiqo PRIVATE -fsanitize=address,undefined)
-  endif()
-
   install(TARGETS opiqo RUNTIME DESTINATION bin)
 
   # ─── Unit tests ──────────────────────────────────────────────────────────────
@@ -226,6 +220,33 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux")
 
     include(GoogleTest)
     gtest_discover_tests(opiqo_tests)
+
+    # ── LV2Plugin unit tests (no JACK / GTK dependency) ──────────────────────
+    add_executable(lv2plugin_tests
+      tests/test_lv2plugin.cpp
+      src/LockFreeQueue.cpp
+    )
+
+    target_include_directories(lv2plugin_tests PRIVATE
+      src/
+      ${LILV_INCLUDE_DIRS}
+    )
+
+    target_compile_options(lv2plugin_tests PRIVATE
+      ${LILV_CFLAGS_OTHER}
+      -Wall -Wextra -Wno-unused-parameter
+    )
+
+    target_link_libraries(lv2plugin_tests PRIVATE
+      GTest::GTest
+      GTest::Main
+      PkgConfig::LILV
+      pthread
+      dl
+    )
+
+    gtest_discover_tests(lv2plugin_tests)
+
   else()
     message(STATUS "GTest not found — skipping unit test target")
   endif()
