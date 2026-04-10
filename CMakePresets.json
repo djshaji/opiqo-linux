@@ -19,6 +19,24 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "OPIQO_TARGET_PLATFORM": "linux"
       }
+    },
+    {
+      "name": "linux-gtk3",
+      "displayName": "Linux GTK3 (JACK)",
+      "binaryDir": "${sourceDir}/build-linux-gtk3",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "OPIQO_TARGET_PLATFORM": "linux-gtk3"
+      }
+    },
+    {
+      "name": "linux-gtk3-debug",
+      "displayName": "Linux GTK3 Debug (JACK)",
+      "binaryDir": "${sourceDir}/build-linux-gtk3-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OPIQO_TARGET_PLATFORM": "linux-gtk3"
+      }
     }
   ],
   "buildPresets": [
@@ -29,6 +47,14 @@
     {
       "name": "linux-debug",
       "configurePreset": "linux-debug"
+    },
+    {
+      "name": "linux-gtk3",
+      "configurePreset": "linux-gtk3"
+    },
+    {
+      "name": "linux-gtk3-debug",
+      "configurePreset": "linux-gtk3-debug"
     }
   ]
 }

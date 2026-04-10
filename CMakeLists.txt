@@ -252,3 +252,75 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux")
   endif()
 
 endif() # OPIQO_TARGET_PLATFORM linux
+
+# ─── Linux / GTK3 / JACK target ──────────────────────────────────────────────
+if(OPIQO_TARGET_PLATFORM STREQUAL "linux-gtk3")
+
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK3     REQUIRED IMPORTED_TARGET gtk+-3.0)
+  pkg_check_modules(JACK     REQUIRED IMPORTED_TARGET jack)
+  pkg_check_modules(LILV     REQUIRED IMPORTED_TARGET lilv-0)
+  pkg_check_modules(SNDFILE  REQUIRED IMPORTED_TARGET sndfile)
+
+  pkg_check_modules(OGG         IMPORTED_TARGET ogg)
+  pkg_check_modules(VORBIS      IMPORTED_TARGET vorbis)
+  pkg_check_modules(VORBISENC   IMPORTED_TARGET vorbisenc)
+
+  add_executable(opiqo-gtk3
+    src/main_linux.cpp
+    src/gtk3/AppSettings.cpp
+    src/gtk3/AudioEngine.cpp
+    src/gtk3/JackPortEnum.cpp
+    src/gtk3/MainWindow.cpp
+    src/gtk3/ControlBar.cpp
+    src/gtk3/PluginSlot.cpp
+    src/gtk3/PluginDialog.cpp
+    src/gtk3/ParameterPanel.cpp
+    src/gtk3/SettingsDialog.cpp
+    src/LiveEffectEngine.cpp
+    src/FileWriter.cpp
+    src/LockFreeQueue.cpp
+  )
+
+  target_include_directories(opiqo-gtk3 PRIVATE
+    src/
+    src/gtk3/
+    ${GTK3_INCLUDE_DIRS}
+    ${JACK_INCLUDE_DIRS}
+    ${LILV_INCLUDE_DIRS}
+    ${SNDFILE_INCLUDE_DIRS}
+  )
+
+  target_compile_options(opiqo-gtk3 PRIVATE
+    ${GTK3_CFLAGS_OTHER}
+    ${JACK_CFLAGS_OTHER}
+    ${LILV_CFLAGS_OTHER}
+    -Wall -Wextra -Wno-unused-parameter
+  )
+
+  target_link_libraries(opiqo-gtk3 PRIVATE
+    PkgConfig::GTK3
+    PkgConfig::JACK
+    PkgConfig::LILV
+    PkgConfig::SNDFILE
+    -lmp3lame
+    -lopus
+    -lopusenc
+    -lFLAC
+    pthread
+    dl
+  )
+
+  if(OGG_FOUND)
+    target_link_libraries(opiqo-gtk3 PRIVATE PkgConfig::OGG)
+  endif()
+  if(VORBIS_FOUND)
+    target_link_libraries(opiqo-gtk3 PRIVATE PkgConfig::VORBIS)
+  endif()
+  if(VORBISENC_FOUND)
+    target_link_libraries(opiqo-gtk3 PRIVATE PkgConfig::VORBISENC)
+  endif()
+
+  install(TARGETS opiqo-gtk3 RUNTIME DESTINATION bin)
+
+endif() # OPIQO_TARGET_PLATFORM linux-gtk3
