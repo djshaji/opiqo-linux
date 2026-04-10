@@ -164,6 +164,9 @@ void ParameterPanel::build(const std::vector<PortInfo>& ports) {
         gtk_box_pack_start(GTK_BOX(box_),
             gtk_separator_new(GTK_ORIENTATION_HORIZONTAL), FALSE, FALSE, 0);
     }
+
+    // GTK3: widgets added after the initial show_all are hidden by default
+    gtk_widget_show_all(scroll_);
 }
 
 // ── Static signal handlers ────────────────────────────────────────────────────
