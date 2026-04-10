@@ -39,7 +39,7 @@ void PluginSlot::buildWidgets() {
     gtk_box_append(GTK_BOX(headerBox_), nameLabel_);
 
     // Add (+) button
-    addButton_ = gtk_button_new_with_label("+");
+    addButton_ = gtk_button_new_with_label("+ Add");
     gtk_widget_set_tooltip_text(addButton_, "Load plugin into this slot");
     g_signal_connect_swapped(addButton_, "clicked",
         G_CALLBACK(+[](PluginSlot* self) {
@@ -62,7 +62,7 @@ void PluginSlot::buildWidgets() {
     gtk_box_append(GTK_BOX(headerBox_), bypassButton_);
 
     // Delete (×) button
-    deleteButton_ = gtk_button_new_with_label("×");
+    deleteButton_ = gtk_button_new_with_label("× Remove");
     gtk_widget_set_tooltip_text(deleteButton_, "Remove plugin from this slot");
     gtk_widget_set_sensitive(deleteButton_, FALSE);
     gtk_widget_add_css_class(deleteButton_, "destructive-action");

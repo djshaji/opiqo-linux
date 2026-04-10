@@ -103,10 +103,27 @@ void MainWindow::buildWidgets() {
     GtkWidget* header = gtk_header_bar_new();
     gtk_header_bar_set_show_title_buttons(GTK_HEADER_BAR(header), TRUE);
 
-    GtkWidget* settingsBtn = gtk_button_new_from_icon_name("preferences-system-symbolic");
+    // GtkWidget* settingsBtn = gtk_button_new_from_icon_name("preferences-system-symbolic");
+    GtkWidget* settingsBtn = gtk_button_new_with_label("Settings");
     gtk_widget_set_tooltip_text(settingsBtn, "Settings");
     g_signal_connect_swapped(settingsBtn, "clicked",
         G_CALLBACK(+[](MainWindow* self) { self->openSettings(); }), this);
+
+    GtkWidget * debugBtn = gtk_button_new_with_label("Test");
+    gtk_widget_set_tooltip_text(debugBtn, "Test plugin load/unload");
+    g_signal_connect_swapped(debugBtn, "clicked",
+        G_CALLBACK(+[](MainWindow* self) { self->testPluginLoadUnload(); }), this);
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), debugBtn);
+    gtk_widget_set_visible(debugBtn, false);  // hide for now; only used for development testing
+
+    GtkWidget* title = gtk_label_new("Opiqo");
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title);
+
+    GtkWidget* aboutBtn = gtk_button_new_with_label("About");
+    gtk_widget_set_tooltip_text(aboutBtn, "About Opiqo");
+    g_signal_connect_swapped(aboutBtn, "clicked",
+        G_CALLBACK(+[](MainWindow* self) { self->showAboutDialog(); }), this);
+    gtk_header_bar_pack_end(GTK_HEADER_BAR(header), aboutBtn);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), settingsBtn);
 
     gtk_window_set_titlebar(GTK_WINDOW(window_), header);
@@ -141,6 +158,11 @@ void MainWindow::buildWidgets() {
 
         gtk_grid_attach(GTK_GRID(slotGrid_), slot->widget(),
                         positions[i][0], positions[i][1], 1, 1);
+        // set 10 px padding around each slot
+        gtk_widget_set_margin_start(slot->widget(), 10);
+        gtk_widget_set_margin_end(slot->widget(), 10);
+        gtk_widget_set_margin_top(slot->widget(), 10);
+        gtk_widget_set_margin_bottom(slot->widget(), 10);
         slots_[i] = slot;
     }
 
@@ -248,6 +270,12 @@ void MainWindow::onRecordToggled(bool start, int format, int quality) {
 void MainWindow::onAddPlugin(int slot) {
     if (audio_->state() != AudioEngine::State::Running) {
         setStatus("Start the engine before loading plugins");
+        GtkWidget* alert = gtk_message_dialog_new(GTK_WINDOW(window_),
+            (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+            GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+            "Start the engine before loading plugins");
+        g_signal_connect(alert, "response", G_CALLBACK(gtk_window_destroy), nullptr);
+        gtk_widget_show(alert);
         return;
     }
 
@@ -389,6 +417,22 @@ gboolean MainWindow::pollEngineState(gpointer data) {
 
 // ── Status bar ────────────────────────────────────────────────────────────────
 
+void MainWindow::showAboutDialog() {
+    GtkWidget* dlg = gtk_about_dialog_new();
+    gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(dlg), "Opiqo");
+    gtk_about_dialog_set_version(GTK_ABOUT_DIALOG(dlg), OPIQO_VERSION);
+    gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(dlg),
+        "\"" CODENAME "\"\n" MOTTO);
+    const char* authors[] = { AUTHOR, nullptr };
+    gtk_about_dialog_set_authors(GTK_ABOUT_DIALOG(dlg), authors);
+    gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(dlg),
+        "https://github.com/djshaji/opiqo-linux");
+    gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG(dlg), "Source code");
+    gtk_window_set_transient_for(GTK_WINDOW(dlg), GTK_WINDOW(window_));
+    gtk_window_set_modal(GTK_WINDOW(dlg), TRUE);
+    gtk_widget_show(dlg);
+}
+
 void MainWindow::setStatus(const std::string& msg) {
     LOGD("[status] %s", msg.c_str());
     if (controlBar_) controlBar_->setStatusText(msg);
@@ -434,4 +478,37 @@ bool MainWindow::loadPluginCache() const {
         LOGD("Failed to parse plugin cache file: %s", path.c_str());
         return false;
     }
+}
+
+void MainWindow::testPluginLoadUnload() {
+    // For debugging: repeatedly load and unload a plugin to check for memory leaks or crashes
+    const json plugins = engine_->getAvailablePlugins();
+    if (plugins.empty()) {
+        LOGD("No plugins available for load/unload test");
+        return;
+    }
+
+    for (auto it = plugins.begin(); it != plugins.end(); ++it) {
+        const std::string& uri = it.key();
+        int slot = 1;
+        LOGD("Testing plugin load: %s", uri.c_str());
+        int rc = engine_->addPlugin(slot, uri);
+        if (rc != 0) {
+            LOGD("Failed to load plugin: %s", uri.c_str());
+            return;
+        } else {
+            const json all = engine_->getAvailablePlugins();
+            std::string name = uri;
+            if (all.contains(uri) && all[uri].contains("name"))
+                name = all[uri]["name"].get<std::string>();
+
+            const auto ports = engine_->getPluginPortInfo(slot);
+            slots_[slot - 1]->onPluginAdded(name, ports);
+            LOGD("Plugin loaded successfully");
+        }
+        engine_->deletePlugin(slot);
+        LOGD("Plugin unloaded successfully");
+    }
+
+    LOGD("Plugin load/unload test completed successfully");
 }

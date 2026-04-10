@@ -38,9 +38,10 @@ void ParameterPanel::build(const std::vector<PortInfo>& ports) {
     for (const auto& port : ports) {
         // ── Row: label + control ─────────────────────────────────────────
         GtkWidget* row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-        gtk_widget_set_margin_start(row, 4);
-        gtk_widget_set_margin_end (row, 4);
-        gtk_widget_set_margin_top (row, 2);
+        gtk_widget_set_margin_start(row, 5);
+        gtk_widget_set_margin_end (row, 5);
+        gtk_widget_set_margin_top (row, 5);
+        gtk_widget_set_margin_bottom (row, 5);
 
         // Label
         GtkWidget* lbl = gtk_label_new(port.label.c_str());
@@ -156,6 +157,10 @@ void ParameterPanel::build(const std::vector<PortInfo>& ports) {
             if (port.type == PortInfo::ControlType::Float && !port.isEnum)
                 gtk_widget_set_hexpand(ctrl, TRUE);
             gtk_box_append(GTK_BOX(row), ctrl);
+            gtk_widget_set_margin_start(ctrl, 5);
+            gtk_widget_set_margin_end(ctrl, 5);
+            gtk_widget_set_margin_top(ctrl, 5);
+            gtk_widget_set_margin_bottom(ctrl, 5);
         }
 
         gtk_box_append(GTK_BOX(box_), row);

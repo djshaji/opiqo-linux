@@ -94,6 +94,12 @@ void PluginDialog::buildWidgets() {
     g_signal_connect_swapped(addBtn, "clicked",
         G_CALLBACK(+[](PluginDialog* self) { self->onConfirm(); }),
         this);
+
+    g_signal_connect(listBox_, "row-activated",
+        G_CALLBACK(+[](GtkListBox* box, GtkListBoxRow* row, PluginDialog* self) {
+            self->onConfirm();
+        }),
+        this);
     gtk_box_append(GTK_BOX(btnBox), addBtn);
 
     gtk_box_append(GTK_BOX(vbox), btnBox);
@@ -170,13 +176,17 @@ void PluginDialog::onConfirm() {
     if (uri && confirmCb_)
         confirmCb_(std::string(uri));
 
-    gtk_window_destroy(GTK_WINDOW(dialog_));
-    dialog_ = nullptr;
+    if (dialog_ && GTK_IS_WINDOW(dialog_)) {
+        gtk_window_destroy(GTK_WINDOW(dialog_));
+        dialog_ = nullptr;
+    }
 }
 
 void PluginDialog::onCancel() {
-    gtk_window_destroy(GTK_WINDOW(dialog_));
-    dialog_ = nullptr;
+    if (dialog_ && GTK_IS_WINDOW(dialog_)) {
+        gtk_window_destroy(GTK_WINDOW(dialog_));
+        dialog_ = nullptr;
+    }
 }
 
 void PluginDialog::show(ConfirmCb cb) {

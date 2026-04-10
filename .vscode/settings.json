@@ -1,0 +1,4 @@
+{
+    "cmake.configurePreset": "linux-default",
+    "cmake.buildPreset": "linux-default"
+}

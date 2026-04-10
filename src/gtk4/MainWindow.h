@@ -19,6 +19,7 @@
 #include "LiveEffectEngine.h"
 #include "PluginSlot.h"
 #include "SettingsDialog.h"
+#include "version.h"
 
 class MainWindow {
 public:
@@ -28,6 +29,7 @@ public:
     GtkWidget* window() const { return window_; }
     void savePluginCache () const;  // for debugging: saves plugin info JSON to ~/opiqo_plugin_cache.json
     bool loadPluginCache () const;  // for debugging: loads plugin info JSON from ~/opiqo_plugin_cache.json (if present) and prints to log
+    void testPluginLoadUnload ();
 private:
     // ── Widget construction ───────────────────────────────────────────────
     void buildWidgets();
@@ -57,6 +59,7 @@ private:
     static gboolean pollEngineState(gpointer data);
 
     void setStatus(const std::string& msg);
+    void showAboutDialog();
 
     // ── Widgets ───────────────────────────────────────────────────────────
     GtkWidget* window_     = nullptr;
