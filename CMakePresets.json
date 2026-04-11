@@ -37,6 +37,24 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "OPIQO_TARGET_PLATFORM": "linux-gtk3"
       }
+    },
+    {
+      "name": "linux-gtk2",
+      "displayName": "Linux GTK2 (JACK)",
+      "binaryDir": "${sourceDir}/build-linux-gtk2",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "OPIQO_TARGET_PLATFORM": "linux-gtk2"
+      }
+    },
+    {
+      "name": "linux-gtk2-debug",
+      "displayName": "Linux GTK2 Debug (JACK)",
+      "binaryDir": "${sourceDir}/build-linux-gtk2-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OPIQO_TARGET_PLATFORM": "linux-gtk2"
+      }
     }
   ],
   "buildPresets": [
@@ -55,6 +73,14 @@
     {
       "name": "linux-gtk3-debug",
       "configurePreset": "linux-gtk3-debug"
+    },
+    {
+      "name": "linux-gtk2",
+      "configurePreset": "linux-gtk2"
+    },
+    {
+      "name": "linux-gtk2-debug",
+      "configurePreset": "linux-gtk2-debug"
     }
   ]
 }

@@ -326,3 +326,78 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux-gtk3")
   install(TARGETS opiqo-gtk3 RUNTIME DESTINATION bin)
 
 endif() # OPIQO_TARGET_PLATFORM linux-gtk3
+
+# ─── Linux / GTK2 / JACK target ──────────────────────────────────────────────
+if(OPIQO_TARGET_PLATFORM STREQUAL "linux-gtk2")
+
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK2     REQUIRED IMPORTED_TARGET gtk+-2.0)
+  pkg_check_modules(JACK     REQUIRED IMPORTED_TARGET jack)
+  pkg_check_modules(LILV     REQUIRED IMPORTED_TARGET lilv-0)
+  pkg_check_modules(SNDFILE  REQUIRED IMPORTED_TARGET sndfile)
+
+  pkg_check_modules(OGG         IMPORTED_TARGET ogg)
+  pkg_check_modules(VORBIS      IMPORTED_TARGET vorbis)
+  pkg_check_modules(VORBISENC   IMPORTED_TARGET vorbisenc)
+
+  add_executable(opiqo-gtk2
+    src/gtk2/main_gtk2.cpp
+    src/gtk2/AppSettings.cpp
+    src/gtk2/AudioEngine.cpp
+    src/gtk2/JackPortEnum.cpp
+    src/gtk2/MainWindow.cpp
+    src/gtk2/ControlBar.cpp
+    src/gtk2/PresetBar.cpp
+    src/gtk2/PluginSlot.cpp
+    src/gtk2/PluginDialog.cpp
+    src/gtk2/ParameterPanel.cpp
+    src/gtk2/SettingsDialog.cpp
+    src/LiveEffectEngine.cpp
+    src/FileWriter.cpp
+    src/LockFreeQueue.cpp
+  )
+
+  target_include_directories(opiqo-gtk2 PRIVATE
+    src/gtk2/
+    src/
+    ${GTK2_INCLUDE_DIRS}
+    ${JACK_INCLUDE_DIRS}
+    ${LILV_INCLUDE_DIRS}
+    ${SNDFILE_INCLUDE_DIRS}
+  )
+
+  target_compile_options(opiqo-gtk2 PRIVATE
+    ${GTK2_CFLAGS_OTHER}
+    ${JACK_CFLAGS_OTHER}
+    ${LILV_CFLAGS_OTHER}
+    -DOPIQO_GTK2
+    -Wall -Wextra -Wno-unused-parameter
+    -Wno-deprecated-declarations  # GTK2 uses deprecated GLib/Pango symbols
+  )
+
+  target_link_libraries(opiqo-gtk2 PRIVATE
+    PkgConfig::GTK2
+    PkgConfig::JACK
+    PkgConfig::LILV
+    PkgConfig::SNDFILE
+    -lmp3lame
+    -lopus
+    -lopusenc
+    -lFLAC
+    pthread
+    dl
+  )
+
+  if(OGG_FOUND)
+    target_link_libraries(opiqo-gtk2 PRIVATE PkgConfig::OGG)
+  endif()
+  if(VORBIS_FOUND)
+    target_link_libraries(opiqo-gtk2 PRIVATE PkgConfig::VORBIS)
+  endif()
+  if(VORBISENC_FOUND)
+    target_link_libraries(opiqo-gtk2 PRIVATE PkgConfig::VORBISENC)
+  endif()
+
+  install(TARGETS opiqo-gtk2 RUNTIME DESTINATION bin)
+
+endif() # OPIQO_TARGET_PLATFORM linux-gtk2

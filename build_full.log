@@ -1,0 +1,75 @@
+[  6%] Building CXX object CMakeFiles/opiqo-gtk2.dir/src/FileWriter.cpp.o
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp: In member function ‘bool FileWriter::openSndfile(int, FileType, int)’:
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp:102:16: warning: missing initializer for member ‘SF_INFO::samplerate’ [-Wmissing-field-initializers]
+  102 |     sfInfo = {0};
+      |                ^
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp:102:16: warning: missing initializer for member ‘SF_INFO::channels’ [-Wmissing-field-initializers]
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp:102:16: warning: missing initializer for member ‘SF_INFO::format’ [-Wmissing-field-initializers]
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp:102:16: warning: missing initializer for member ‘SF_INFO::sections’ [-Wmissing-field-initializers]
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp:102:16: warning: missing initializer for member ‘SF_INFO::seekable’ [-Wmissing-field-initializers]
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp:143:13: warning: unused variable ‘errnum’ [-Wunused-variable]
+  143 |         int errnum;
+      |             ^~~~~~
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp: In static member function ‘static int FileWriter::encode(AudioBuffer*)’:
+/home/djshaji/projects/opiqo-linux/src/FileWriter.cpp:251:17: warning: unused variable ‘errnum’ [-Wunused-variable]
+  251 |             int errnum;
+      |                 ^~~~~~
+[ 13%] Building CXX object CMakeFiles/opiqo-gtk2.dir/src/LiveEffectEngine.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.h:31,
+                 from /home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.cpp:21:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1722:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1722 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1717:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1717 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:447:5: warning:   when initialized here [-Wreorder]
+  447 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1718:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1718 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1713:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1713 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:447:5: warning:   when initialized here [-Wreorder]
+  447 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1722:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1722 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1717:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1717 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:456:5: warning:   when initialized here [-Wreorder]
+  456 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1718:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1718 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1713:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1713 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:456:5: warning:   when initialized here [-Wreorder]
+  456 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1051:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1051 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.cpp: In member function ‘int LiveEffectEngine::addPlugin(int, std::string)’:
+/home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.cpp:187:17: warning: unused variable ‘portsTotal’ [-Wunused-variable]
+  187 |             int portsTotal = lilv_plugin_get_num_ports(plugin->plugin_);
+      |                 ^~~~~~~~~~
+[ 20%] Building CXX object CMakeFiles/opiqo-gtk2.dir/src/LockFreeQueue.cpp.o
+/home/djshaji/projects/opiqo-linux/src/LockFreeQueue.cpp: In member function ‘void LockFreeQueueManager::add_function(int (*)(AudioBuffer*))’:
+/home/djshaji/projects/opiqo-linux/src/LockFreeQueue.cpp:69:35: warning: cast between incompatible function types from ‘int (*)(AudioBuffer*)’ {aka ‘int (*)(audio_buffer*)’} to ‘void (*)(AudioBuffer*)’ {aka ‘void (*)(audio_buffer*)’} [-Wcast-function-type]
+   69 |     functions [functions_count] = reinterpret_cast<void (*)(AudioBuffer *)>(f);
+      |                                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LockFreeQueue.cpp: In member function ‘void LockFreeQueueManager::quit()’:
+/home/djshaji/projects/opiqo-linux/src/LockFreeQueue.cpp:122:9: warning: statement has no effect [-Wunused-value]
+  122 |         1 ; // TIL this can also be a statement
+      |         ^
+[ 26%] Building CXX object CMakeFiles/opiqo-gtk2.dir/src/gtk2/AppSettings.cpp.o

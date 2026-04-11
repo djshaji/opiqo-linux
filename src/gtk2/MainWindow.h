@@ -1,0 +1,100 @@
+// src/gtk2/MainWindow.h
+// Top-level application window (GTK2 port).
+// Owns: LiveEffectEngine, AudioEngine, JackPortEnum, AppSettings,
+//       ControlBar, 4 × PluginSlot, SettingsDialog.
+
+#pragma once
+
+#include <array>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <gtk/gtk.h>
+#include <sys/stat.h>
+
+#include "AppSettings.h"
+#include "AudioEngine.h"
+#include "ControlBar.h"
+#include "JackPortEnum.h"
+#include "LiveEffectEngine.h"
+#include "PluginSlot.h"
+#include "PresetBar.h"
+#include "SettingsDialog.h"
+#include "json.hpp"
+#include "version.h"
+
+using json = nlohmann::json;
+
+class MainWindow {
+public:
+    MainWindow();   // GTK2: no GtkApplication arg
+    ~MainWindow();
+
+    GtkWidget* window() const { return window_; }
+    void savePluginCache() const;
+    bool loadPluginCache() const;
+    void testPluginLoadUnload();
+
+private:
+    // ── Widget construction ───────────────────────────────────────────────
+    void buildWidgets();
+    void buildMenuBar(GtkWidget* root);
+    void loadStyle();
+
+    // ── Engine lifecycle ──────────────────────────────────────────────────
+    void onPowerToggled(bool on);
+    void onGainChanged(float gain);
+
+    // ── Recording ─────────────────────────────────────────────────────────
+    void onRecordToggled(bool start, int format, int quality);
+
+    // ── Plugin management ─────────────────────────────────────────────────
+    void onAddPlugin(int slot);
+    void onDeletePlugin(int slot);
+    void onBypassPlugin(int slot, bool bypassed);
+    void onSetValue(int slot, uint32_t portIndex, float value);
+    void onSetFilePath(int slot, const std::string& uri, const std::string& path);
+
+    // ── Settings ──────────────────────────────────────────────────────────
+    void openSettings();
+    void onSettingsApply(const AppSettings& s);
+    std::string onExportPreset();
+    void onImportPreset(const std::string& path);
+
+    // ── Named presets ─────────────────────────────────────────────────────
+    void loadNamedPresets();
+    void saveNamedPresets() const;
+    void applyFullPreset(const json& presetData);
+    void onPresetLoad();
+    void onPresetSave(const std::string& name);
+    void onPresetDelete();
+    std::string namedPresetsPath() const;
+
+    // ── Periodic poll (200 ms timer on main thread) ───────────────────────
+    static gboolean pollEngineState(gpointer data);
+
+    void setStatus(const std::string& msg);
+    void showAboutDialog();
+
+    // ── Widgets ───────────────────────────────────────────────────────────
+    GtkWidget* window_     = nullptr;
+    GtkWidget* slotTable_  = nullptr;   // GTK2: GtkTable instead of GtkGrid
+
+    std::unique_ptr<ControlBar>     controlBar_;
+    std::unique_ptr<PresetBar>      presetBar_;
+    std::array<PluginSlot*, 4>      slots_      = {};  // indices 0–3 (slot index 1–4)
+    std::unique_ptr<SettingsDialog> settingsDlg_;
+
+    // ── Domain objects ────────────────────────────────────────────────────
+    std::unique_ptr<LiveEffectEngine> engine_;
+    std::unique_ptr<AudioEngine>      audio_;
+    std::unique_ptr<JackPortEnum>     portEnum_;
+    AppSettings                        settings_;
+
+    bool   isRecording_   = false;
+    guint  pollTimerId_   = 0;
+
+    // ── Named presets (in-memory list, persisted to JSON) ─────────────────
+    std::vector<json> namedPresets_;  // each entry: {"name": str, "data": {...}}
+};
