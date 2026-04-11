@@ -3,7 +3,9 @@
 
 #include <gtk/gtk.h>
 
-#include "gtk4/MainWindow.h"
+// "MainWindow.h" resolves to src/gtk4/MainWindow.h or src/gtk3/MainWindow.h
+// depending on which include path the build system supplies first.
+#include "MainWindow.h"
 
 // One MainWindow per application lifetime
 static MainWindow* g_mainWindow = nullptr;

@@ -3,6 +3,7 @@
 #include "MainWindow.h"
 
 #include "PluginDialog.h"
+#include "PresetBar.h"
 #include "logging_macros.h"
 #include "json.hpp"
 
@@ -72,6 +73,9 @@ MainWindow::MainWindow(GtkApplication* app) {
 
     // GTK3: show_all to recursively show all children
     gtk_widget_show_all(window_);
+
+    // Load named presets from disk (non-critical; ignore failures)
+    loadNamedPresets();
 
     // ── Periodic engine-state poll (200 ms) ───────────────────────────────
     pollTimerId_ = g_timeout_add(200, pollEngineState, this);
@@ -174,7 +178,11 @@ void MainWindow::buildWidgets() {
     // ── Separator ─────────────────────────────────────────────────────────
     gtk_box_pack_start(GTK_BOX(root),
         gtk_separator_new(GTK_ORIENTATION_HORIZONTAL), FALSE, FALSE, 0);
-
+    // ── Preset bar ────────────────────────────────────────────────────
+    presetBar_ = std::make_unique<PresetBar>(root);
+    presetBar_->setLoadCallback  ([this]()                    { onPresetLoad(); });
+    presetBar_->setSaveCallback  ([this](const std::string& n) { onPresetSave(n); });
+    presetBar_->setDeleteCallback([this]()                    { onPresetDelete(); });
     // ── Control bar ───────────────────────────────────────────────────────
     controlBar_ = std::make_unique<ControlBar>(root);
     controlBar_->setPowerCallback ([this](bool on)           { onPowerToggled(on); });
@@ -505,4 +513,153 @@ void MainWindow::testPluginLoadUnload() {
             LOGD("Plugin unloaded: %s", uri.c_str());
         }
     }
+}
+
+// ── Named preset management ────────────────────────────────────────────────────
+
+std::string MainWindow::namedPresetsPath() const {
+    return std::string(dirname((char*)AppSettings::configPath().c_str()))
+           + "/opiqo_named_presets.json";
+}
+
+void MainWindow::loadNamedPresets() {
+    const std::string path = namedPresetsPath();
+    std::ifstream f(path);
+    if (!f.is_open()) {
+        LOGD("Named presets file not found: %s", path.c_str());
+        return;
+    }
+    try {
+        json j;
+        f >> j;
+        if (j.is_array())
+            namedPresets_ = j.get<std::vector<json>>();
+        std::vector<std::string> names;
+        for (const auto& p : namedPresets_)
+            if (p.contains("name") && p["name"].is_string())
+                names.push_back(p["name"].get<std::string>());
+        if (presetBar_) presetBar_->setPresetNames(names);
+        LOGD("Loaded %zu named presets", namedPresets_.size());
+    } catch (...) {
+        LOGD("Failed to parse named presets file: %s", path.c_str());
+    }
+}
+
+void MainWindow::saveNamedPresets() const {
+    const std::string path = namedPresetsPath();
+    std::string dirPath = std::string(dirname((char*)AppSettings::configPath().c_str()));
+    if (mkdir(dirPath.c_str(), 0755) == -1 && errno != EEXIST) {
+        LOGD("Failed to create config directory for named presets");
+        return;
+    }
+    json j = namedPresets_;
+    std::ofstream f(path);
+    if (f.is_open()) {
+        f << j.dump(2) << '\n';
+        LOGD("Named presets saved to %s", path.c_str());
+    } else {
+        LOGD("Failed to save named presets: %s", path.c_str());
+    }
+}
+
+void MainWindow::applyFullPreset(const json& presetData) {
+    if (presetData.contains("gain") && presetData["gain"].is_number()) {
+        const float g = presetData["gain"].get<float>();
+        if (engine_->gain) *engine_->gain = g;
+        settings_.gain = g;
+        if (controlBar_) controlBar_->setGainValue(g);
+    }
+
+    const json all = engine_->getAvailablePlugins();
+    for (int slot = 1; slot <= 4; ++slot) {
+        const std::string key = "plugin" + std::to_string(slot);
+        if (!presetData.contains(key)) continue;
+        const json& sp = presetData[key];
+
+        engine_->deletePlugin(slot);
+        slots_[slot - 1]->onPluginCleared();
+
+        if (sp.is_object() && sp.contains("uri") && sp["uri"].is_string()) {
+            const std::string uri = sp["uri"].get<std::string>();
+            if (!uri.empty() && engine_->addPlugin(slot, uri) == 0) {
+                engine_->applyPreset(slot, sp);
+                std::string name = uri;
+                if (all.contains(uri) && all[uri].contains("name"))
+                    name = all[uri]["name"].get<std::string>();
+                slots_[slot - 1]->onPluginAdded(name, engine_->getPluginPortInfo(slot));
+            }
+        }
+    }
+}
+
+void MainWindow::onPresetLoad() {
+    if (!presetBar_) return;
+    const int idx = presetBar_->getSelectedIndex();
+    if (idx < 0 || idx >= static_cast<int>(namedPresets_.size())) {
+        setStatus("No preset selected");
+        return;
+    }
+    const json& entry = namedPresets_[static_cast<size_t>(idx)];
+    if (!entry.contains("data")) { setStatus("Invalid preset data"); return; }
+    applyFullPreset(entry["data"]);
+    const std::string name = entry.contains("name") ? entry["name"].get<std::string>() : "";
+    setStatus("Preset loaded: " + name);
+}
+
+void MainWindow::onPresetSave(const std::string& name) {
+    if (name.empty()) { setStatus("Enter a preset name before saving"); return; }
+
+    json data;
+    try {
+        data = json::parse(engine_->getPresetList());
+    } catch (...) {
+        setStatus("Failed to capture preset data");
+        return;
+    }
+
+    bool found = false;
+    for (auto& entry : namedPresets_) {
+        if (entry.contains("name") && entry["name"].get<std::string>() == name) {
+            entry["data"] = data;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        json entry;
+        entry["name"] = name;
+        entry["data"] = data;
+        namedPresets_.push_back(entry);
+    }
+
+    saveNamedPresets();
+
+    std::vector<std::string> names;
+    for (const auto& p : namedPresets_)
+        if (p.contains("name")) names.push_back(p["name"].get<std::string>());
+    if (presetBar_) presetBar_->setPresetNames(names);
+
+    setStatus("Preset saved: " + name);
+}
+
+void MainWindow::onPresetDelete() {
+    if (!presetBar_) return;
+    const int idx = presetBar_->getSelectedIndex();
+    if (idx < 0 || idx >= static_cast<int>(namedPresets_.size())) {
+        setStatus("No preset selected");
+        return;
+    }
+    const std::string name = namedPresets_[static_cast<size_t>(idx)].contains("name")
+        ? namedPresets_[static_cast<size_t>(idx)]["name"].get<std::string>() : "";
+    namedPresets_.erase(namedPresets_.begin() + idx);
+    saveNamedPresets();
+
+    std::vector<std::string> names;
+    for (const auto& p : namedPresets_)
+        if (p.contains("name")) names.push_back(p["name"].get<std::string>());
+    if (presetBar_) {
+        presetBar_->setPresetNames(names);
+        presetBar_->setCurrentName("");
+    }
+    setStatus("Preset deleted: " + name);
 }

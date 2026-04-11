@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(opiqo VERSION 1.0.0 LANGUAGES CXX)
+project(opiqo VERSION 0.8.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -112,6 +112,7 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux")
     src/gtk4/JackPortEnum.cpp
     src/gtk4/MainWindow.cpp
     src/gtk4/ControlBar.cpp
+    src/gtk4/PresetBar.cpp
     src/gtk4/PluginSlot.cpp
     src/gtk4/PluginDialog.cpp
     src/gtk4/ParameterPanel.cpp
@@ -124,8 +125,8 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux")
   )
 
   target_include_directories(opiqo PRIVATE
-    src/
     src/gtk4/
+    src/
     ${GTK4_INCLUDE_DIRS}
     ${JACK_INCLUDE_DIRS}
     ${LILV_INCLUDE_DIRS}
@@ -273,6 +274,7 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux-gtk3")
     src/gtk3/JackPortEnum.cpp
     src/gtk3/MainWindow.cpp
     src/gtk3/ControlBar.cpp
+    src/gtk3/PresetBar.cpp
     src/gtk3/PluginSlot.cpp
     src/gtk3/PluginDialog.cpp
     src/gtk3/ParameterPanel.cpp
@@ -283,8 +285,8 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux-gtk3")
   )
 
   target_include_directories(opiqo-gtk3 PRIVATE
-    src/
     src/gtk3/
+    src/
     ${GTK3_INCLUDE_DIRS}
     ${JACK_INCLUDE_DIRS}
     ${LILV_INCLUDE_DIRS}

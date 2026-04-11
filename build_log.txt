@@ -1,1 +1,101 @@
-[100%] Built target opiqo-gtk3
+g++ -g -std=c++17 -O2 -Wall -Isrc -I/usr/include/opus -I/usr/include/lilv-0 -I/usr/include/sratom-0 -I/usr/include/sord-0 -I/usr/include/serd-0 -I/usr/include/zix-0 -c src/main.cpp -o src/main.o
+In file included from src/LiveEffectEngine.h:31,
+                 from src/main.cpp:1:
+src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+src/LV2Plugin.hpp:1722:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1722 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+src/LV2Plugin.hpp:1717:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1717 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+src/LV2Plugin.hpp:447:5: warning:   when initialized here [-Wreorder]
+  447 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+src/LV2Plugin.hpp:1718:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1718 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+src/LV2Plugin.hpp:1713:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1713 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+src/LV2Plugin.hpp:447:5: warning:   when initialized here [-Wreorder]
+  447 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+src/LV2Plugin.hpp:1722:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1722 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+src/LV2Plugin.hpp:1717:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1717 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+src/LV2Plugin.hpp:456:5: warning:   when initialized here [-Wreorder]
+  456 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+src/LV2Plugin.hpp:1718:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1718 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+src/LV2Plugin.hpp:1713:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1713 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+src/LV2Plugin.hpp:456:5: warning:   when initialized here [-Wreorder]
+  456 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+g++ -g -std=c++17 -O2 -Wall -Isrc -I/usr/include/opus -I/usr/include/lilv-0 -I/usr/include/sratom-0 -I/usr/include/sord-0 -I/usr/include/serd-0 -I/usr/include/zix-0 -c src/LiveEffectEngine.cpp -o src/LiveEffectEngine.o
+In file included from src/LiveEffectEngine.h:31,
+                 from src/LiveEffectEngine.cpp:21:
+src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+src/LV2Plugin.hpp:1722:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1722 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+src/LV2Plugin.hpp:1717:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1717 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+src/LV2Plugin.hpp:447:5: warning:   when initialized here [-Wreorder]
+  447 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+src/LV2Plugin.hpp:1718:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1718 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+src/LV2Plugin.hpp:1713:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1713 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+src/LV2Plugin.hpp:447:5: warning:   when initialized here [-Wreorder]
+  447 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+src/LV2Plugin.hpp:1722:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1722 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+src/LV2Plugin.hpp:1717:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1717 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+src/LV2Plugin.hpp:456:5: warning:   when initialized here [-Wreorder]
+  456 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+src/LV2Plugin.hpp:1718:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1718 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+src/LV2Plugin.hpp:1713:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1713 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+src/LV2Plugin.hpp:456:5: warning:   when initialized here [-Wreorder]
+  456 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+src/LiveEffectEngine.cpp: In member function ‘int LiveEffectEngine::addPlugin(int, std::string)’:
+src/LiveEffectEngine.cpp:187:17: warning: unused variable ‘portsTotal’ [-Wunused-variable]
+  187 |             int portsTotal = lilv_plugin_get_num_ports(plugin->plugin_);
+      |                 ^~~~~~~~~~
+g++ -g -std=c++17 -O2 -Wall -Isrc -I/usr/include/opus -I/usr/include/lilv-0 -I/usr/include/sratom-0 -I/usr/include/sord-0 -I/usr/include/serd-0 -I/usr/include/zix-0 -c src/FileWriter.cpp -o src/FileWriter.o
+src/FileWriter.cpp: In member function ‘bool FileWriter::openSndfile(int, FileType, int)’:
+src/FileWriter.cpp:143:13: warning: unused variable ‘errnum’ [-Wunused-variable]
+  143 |         int errnum;
+      |             ^~~~~~
+src/FileWriter.cpp: In static member function ‘static int FileWriter::encode(AudioBuffer*)’:
+src/FileWriter.cpp:251:17: warning: unused variable ‘errnum’ [-Wunused-variable]
+  251 |             int errnum;
+      |                 ^~~~~~
+g++ -g -std=c++17 -O2 -Wall -Isrc -I/usr/include/opus -I/usr/include/lilv-0 -I/usr/include/sratom-0 -I/usr/include/sord-0 -I/usr/include/serd-0 -I/usr/include/zix-0 -c src/LockFreeQueue.cpp -o src/LockFreeQueue.o
+src/LockFreeQueue.cpp: In member function ‘void LockFreeQueueManager::quit()’:
+src/LockFreeQueue.cpp:122:9: warning: statement has no effect [-Wunused-value]
+  122 |         1 ; // TIL this can also be a statement
+      |         ^
+g++ -g -std=c++17 -O2 -Wall -Isrc -I/usr/include/opus -I/usr/include/lilv-0 -I/usr/include/sratom-0 -I/usr/include/sord-0 -I/usr/include/serd-0 -I/usr/include/zix-0 -o opiqo src/main.o src/LiveEffectEngine.o src/FileWriter.o src/LockFreeQueue.o -lsndfile -llilv-0 -lsratom-0 -lsord-0 -lserd-0 -lvorbisenc -lvorbis -logg -lopus -lopusenc -lmp3lame -lFLAC -ldl -lpthread

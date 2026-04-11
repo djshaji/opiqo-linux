@@ -160,6 +160,12 @@ void ControlBar::setPowerState(bool on) {
     suppressSignals_ = false;
 }
 
+void ControlBar::setGainValue(float gain) {
+    suppressSignals_ = true;
+    gtk_range_set_value(GTK_RANGE(gainScale_), static_cast<double>(gain));
+    suppressSignals_ = false;
+}
+
 void ControlBar::setRecordingActive(bool active) {
     suppressSignals_ = true;
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(recordToggle_), active ? TRUE : FALSE);

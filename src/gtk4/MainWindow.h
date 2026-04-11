@@ -8,6 +8,7 @@
 #include <array>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <gtk/gtk.h>
 #include <sys/stat.h>
@@ -18,8 +19,12 @@
 #include "JackPortEnum.h"
 #include "LiveEffectEngine.h"
 #include "PluginSlot.h"
+#include "PresetBar.h"
 #include "SettingsDialog.h"
+#include "json.hpp"
 #include "version.h"
+
+using json = nlohmann::json;
 
 class MainWindow {
 public:
@@ -55,6 +60,15 @@ private:
     std::string onExportPreset();
     void onImportPreset(const std::string& path);
 
+    // ── Named presets ─────────────────────────────────────────────────────
+    void loadNamedPresets();
+    void saveNamedPresets() const;
+    void applyFullPreset(const json& presetData);
+    void onPresetLoad();
+    void onPresetSave(const std::string& name);
+    void onPresetDelete();
+    std::string namedPresetsPath() const;
+
     // ── Periodic poll (200 ms timer on main thread) ───────────────────────
     static gboolean pollEngineState(gpointer data);
 
@@ -66,6 +80,7 @@ private:
     GtkWidget* slotGrid_   = nullptr;
 
     std::unique_ptr<ControlBar>    controlBar_;
+    std::unique_ptr<PresetBar>     presetBar_;
     std::array<PluginSlot*, 4>     slots_     = {};  // indices 0–3 (slot index 1–4)
     std::unique_ptr<SettingsDialog> settingsDlg_;
 
@@ -77,4 +92,7 @@ private:
 
     bool   isRecording_    = false;
     guint  pollTimerId_    = 0;
+
+    // ── Named presets (in-memory list, persisted to JSON) ─────────────────
+    std::vector<json> namedPresets_;  // each entry: {"name": str, "data": {...}}
 };

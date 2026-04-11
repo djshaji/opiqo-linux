@@ -14,13 +14,14 @@
 4. [Class Reference](#4-class-reference)
    - 4.1 [MainWindow](#41-mainwindow)
    - 4.2 [ControlBar](#42-controlbar)
-   - 4.3 [PluginSlot](#43-pluginslot)
-   - 4.4 [ParameterPanel](#44-parameterpanel)
-   - 4.5 [PluginDialog](#45-plugindialog)
-   - 4.6 [SettingsDialog](#46-settingsdialog)
-   - 4.7 [AppSettings](#47-appsettings)
-   - 4.8 [AudioEngine](#48-audioengine)
-   - 4.9 [JackPortEnum](#49-jackportenum)
+   - 4.3 [PresetBar](#43-presetbar)
+   - 4.4 [PluginSlot](#44-pluginslot)
+   - 4.5 [ParameterPanel](#45-parameterpanel)
+   - 4.6 [PluginDialog](#46-plugindialog)
+   - 4.7 [SettingsDialog](#47-settingsdialog)
+   - 4.8 [AppSettings](#48-appsettings)
+   - 4.9 [AudioEngine](#49-audioengine)
+   - 4.10 [JackPortEnum](#410-jackportenum)
 5. [Signal & Callback Flow](#5-signal--callback-flow)
 6. [Threading Model](#6-threading-model)
 7. [Startup & Shutdown Sequence](#7-startup--shutdown-sequence)
@@ -46,6 +47,7 @@ Opiqo is a real-time LV2 plugin host that routes JACK audio through a chain of u
 **Frontend layer** (GTK4-specific, lives in `src/gtk4/`):
 - `MainWindow` — Application window; owns all other frontend objects.
 - `ControlBar` — Horizontal bar at the bottom: power, gain, recording controls.
+- `PresetBar` — Horizontal bar above the ControlBar: named preset selector, name entry, load/save/delete buttons.
 - `PluginSlot` — One of four plugin slots in the 2×2 grid.
 - `ParameterPanel` — Dynamically built LV2 control parameter widgets inside a slot.
 - `PluginDialog` — Modal searchable LV2 plugin browser.
@@ -65,6 +67,7 @@ GtkApplication
     ├── JackPortEnum                   (domain)
     ├── AppSettings                    (value type, saved on ~MainWindow)
     ├── ControlBar                     (unique_ptr)
+    ├── PresetBar                      (unique_ptr)
     ├── PluginSlot[4]                  (raw ptr array, deleted in ~MainWindow)
     │   └── ParameterPanel             (raw ptr, owned by PluginSlot)
     └── SettingsDialog                 (unique_ptr, created lazily)
@@ -112,6 +115,17 @@ GtkApplicationWindow  (window_)
     │   └── [1,1] PluginSlot 4  (same structure)
     │
     ├── GtkSeparator (horizontal)
+    │
+    ├── PresetBar → GtkBox (bar_, HORIZONTAL)
+    │   ├── GtkLabel "Preset:"
+    │   ├── GtkDropDown (presetDrop_, named preset list; search enabled on GTK 4.12+)
+    │   ├── GtkSeparator
+    │   ├── GtkLabel "Name:"
+    │   ├── GtkEntry (nameEntry_, editable preset name)
+    │   ├── GtkSeparator
+    │   ├── GtkButton "Load"
+    │   ├── GtkButton "Save"
+    │   └── GtkButton "Delete"
     │
     └── ControlBar → GtkBox (bar_, HORIZONTAL)
         ├── GtkToggleButton "Power"
@@ -164,7 +178,7 @@ The top-level application window. Created once in `main_linux.cpp` and attached 
 | Method | Purpose |
 |---|---|
 | `loadCss()` | Creates a `GtkCssProvider` from the embedded `kAppCss` string literal and registers it for the default display at `APPLICATION` priority. |
-| `buildWidgets()` | Constructs the full widget tree (header bar, slot grid, separator, control bar). Wires all slot callbacks. |
+| `buildWidgets()` | Constructs the full widget tree (header bar, slot grid, separator, preset bar, control bar). Wires all slot and preset callbacks. |
 | `onPowerToggled(bool on)` | `on=true`: resolves JACK port names, calls `audio_->start()`; `on=false`: stops recording if active, calls `audio_->stop()`. |
 | `onGainChanged(float gain)` | Writes to `*engine_->gain` (atomic float ptr) and saves to `settings_.gain`. |
 | `onRecordToggled(bool start, int format, int quality)` | Generates a timestamped file path in the XDG Music folder, opens a file descriptor, calls `engine_->startRecording()` or `engine_->stopRecording()`. |
@@ -177,6 +191,12 @@ The top-level application window. Created once in `main_linux.cpp` and attached 
 | `onSettingsApply(AppSettings)` | Stores new settings; if engine was running, stops and restarts it with new port names. |
 | `onExportPreset()` | Returns `engine_->getPresetList()` (a JSON string) to `SettingsDialog`. |
 | `onImportPreset(path)` | Opens the file, parses JSON array, applies each slot via `engine_->applyPreset()` and refreshes the `PluginSlot` UI. |
+| `loadNamedPresets()` | Reads `$XDG_CONFIG_HOME/opiqo/opiqo_named_presets.json`; populates `namedPresets_` and updates the `PresetBar` dropdown. |
+| `saveNamedPresets()` | Serialises `namedPresets_` to JSON and writes the file. |
+| `applyFullPreset(data)` | Applies a full preset JSON object: sets gain, rebuilds all four plugin slots via `engine_->deletePlugin/addPlugin/applyPreset`, and refreshes the `PluginSlot` UIs. |
+| `onPresetLoad()` | Reads the selected index from `presetBar_`, calls `applyFullPreset()`. |
+| `onPresetSave(name)` | Captures `engine_->getPresetList()`, upserts an entry in `namedPresets_` under `name`, saves to disk, refreshes dropdown. |
+| `onPresetDelete()` | Removes the selected entry from `namedPresets_`, saves to disk, refreshes dropdown. |
 | `pollEngineState(gpointer)` | **Static**, called every 200 ms on the main thread. Checks `audio_->state()`; resets power/record UI on error. Updates xrun counter. Returns `G_SOURCE_CONTINUE`. |
 | `setStatus(msg)` | Logs the message and forwards it to `controlBar_->setStatusText()`. |
 | `showAboutDialog()` | Creates and shows a `GtkAboutDialog` with version, codename, auth and website. |
@@ -227,7 +247,71 @@ A horizontal `GtkBox` appended to the root box by its constructor. Encapsulates 
 
 ---
 
-### 4.3 PluginSlot
+### 4.3 PresetBar
+
+**File:** `src/gtk4/PresetBar.h` / `PresetBar.cpp`
+
+A horizontal `GtkBox` inserted between the slot-grid separator and the `ControlBar`. Provides named preset management: a searchable list dropdown, an editable name entry, and Load / Save / Delete buttons.
+
+#### Construction
+
+`PresetBar(GtkWidget* parent_box)` calls `buildWidgets()` which creates all widgets and appends `bar_` to `parent_box`.
+
+#### Widgets
+
+| Widget | Type | Signal | Action |
+|---|---|---|---|
+| `presetDrop_` | `GtkDropDown` (backed by `GtkStringList`) | `notify::selected` | `onDropdownChanged()` → copies selected name to `nameEntry_` |
+| `nameEntry_` | `GtkEntry` | (read on Save) | Editable name field for save / display |
+| `loadBtn_` | `GtkButton "Load"` | `clicked` | Fires `loadCb_()` |
+| `saveBtn_` | `GtkButton "Save"` | `clicked` | Fires `saveCb_(getCurrentName())` |
+| `deleteBtn_` | `GtkButton "Delete"` | `clicked` | Fires `deleteCb_()` |
+
+Search on the dropdown is enabled via `gtk_drop_down_set_enable_search(TRUE)` on GTK 4.12+.
+
+#### Callback contracts
+
+| Callback type | Provided by `MainWindow` | Description |
+|---|---|---|
+| `LoadCb = function<void()>` | `onPresetLoad()` | Reads `getSelectedIndex()` and calls `applyFullPreset(namedPresets_[idx]["data"])`. |
+| `SaveCb = function<void(string)>` | `onPresetSave(name)` | Captures `engine_->getPresetList()`, upserts in `namedPresets_`, saves JSON, refreshes dropdown. |
+| `DeleteCb = function<void()>` | `onPresetDelete()` | Removes `namedPresets_[getSelectedIndex()]`, saves JSON, refreshes dropdown. |
+
+#### Public API
+
+| Method | Purpose |
+|---|---|
+| `setPresetNames(names)` | Replaces `GtkStringList` contents with the given names. |
+| `setCurrentName(name)` | Sets the `nameEntry_` text. |
+| `getCurrentName()` | Returns the current `nameEntry_` text. |
+| `getSelectedIndex()` | Returns the selected index (−1 if none / `GTK_INVALID_LIST_POSITION`). |
+
+#### Named preset storage
+
+Named presets are persisted by `MainWindow` to  
+`$XDG_CONFIG_HOME/opiqo/opiqo_named_presets.json` as a JSON array:
+
+```json
+[
+  { "name": "My Rock Preset",
+    "data": { "app": "opiqo-desktop", "gain": 1.2,
+              "plugin1": { "uri": "...", "..." : 0.5 },
+              "plugin2": {}, "plugin3": {}, "plugin4": {} } }
+]
+```
+
+#### Porting Notes
+
+| Toolkit | Replacement for `GtkDropDown` | Replacement for `gtk_box_append` |
+|---|---|---|
+| GTK3 | `GtkComboBoxText` (with entry for search) | `gtk_box_pack_start` |
+| GTK2 | `GtkComboBox`/`GtkComboBoxEntry` | `gtk_box_pack_start` |
+| Xlib | Custom list widget + text field | N/A |
+| ncurses | `MENU` widget (ncurses-menu) + form field | N/A |
+
+---
+
+### 4.4 PluginSlot
 
 **File:** `src/gtk4/PluginSlot.h` / `PluginSlot.cpp`
 
@@ -281,7 +365,7 @@ ParameterPanel::fileCb(uri, path)
 
 ---
 
-### 4.4 ParameterPanel
+### 4.5 ParameterPanel
 
 **File:** `src/gtk4/ParameterPanel.h` / `ParameterPanel.cpp`
 
@@ -331,7 +415,7 @@ Each control allocates a `ControlData` struct (or `EnumData` for enums) on the h
 
 ---
 
-### 4.5 PluginDialog
+### 4.6 PluginDialog
 
 **File:** `src/gtk4/PluginDialog.h` / `PluginDialog.cpp`
 
@@ -386,7 +470,7 @@ Clears all rows. For each entry in `allPlugins_`, performs a case-insensitive su
 
 ---
 
-### 4.6 SettingsDialog
+### 4.7 SettingsDialog
 
 **File:** `src/gtk4/SettingsDialog.h` / `SettingsDialog.cpp`
 
@@ -424,7 +508,7 @@ Updates `srLabel_` and `bsLabel_` text labels. Called by `MainWindow` after the 
 
 ---
 
-### 4.7 AppSettings
+### 4.8 AppSettings
 
 **File:** `src/gtk4/AppSettings.h` / `AppSettings.cpp`
 
@@ -449,7 +533,7 @@ Plain data struct with JSON (de)serialisation via `nlohmann::json`. Persisted at
 
 ---
 
-### 4.8 AudioEngine
+### 4.9 AudioEngine
 
 **File:** `src/gtk4/AudioEngine.h` / `AudioEngine.cpp`
 
@@ -480,7 +564,7 @@ Off → Starting → Running → Stopping → Off
 
 ---
 
-### 4.9 JackPortEnum
+### 4.10 JackPortEnum
 
 **File:** `src/gtk4/JackPortEnum.h` / `JackPortEnum.cpp`
 

@@ -24,6 +24,7 @@ public:
 
     void setPowerState(bool on);
     void setRecordingActive(bool active);
+    void setGainValue(float gain);   // set slider without firing gainCb_
     void setStatusText(const std::string& text);
     void setXrunCount(uint64_t n);
 
