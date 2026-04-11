@@ -28,6 +28,12 @@
 #include <lv2/urid/urid.h>
 #include <lv2/atom/atom.h>
 #include <lv2/atom/util.h>
+// X11 headers define Bool as a macro; undef before LV2 headers to avoid clash
+#ifdef _X11_XLIB_H_
+    #ifdef Bool
+    #  undef Bool
+    #endif
+#endif
 #include <lv2/atom/forge.h>
 #include <lv2/options/options.h>
 #include <lv2/parameters/parameters.h>

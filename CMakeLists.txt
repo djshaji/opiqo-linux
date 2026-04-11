@@ -401,3 +401,80 @@ if(OPIQO_TARGET_PLATFORM STREQUAL "linux-gtk2")
   install(TARGETS opiqo-gtk2 RUNTIME DESTINATION bin)
 
 endif() # OPIQO_TARGET_PLATFORM linux-gtk2
+
+# ─── Linux / Xlib+Xaw / JACK target ──────────────────────────────────────────
+if(OPIQO_TARGET_PLATFORM STREQUAL "linux-xlib")
+
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(X11_LIBS REQUIRED IMPORTED_TARGET x11 xt xmu xaw7 xext)
+  pkg_check_modules(JACK     REQUIRED IMPORTED_TARGET jack)
+  pkg_check_modules(LILV     REQUIRED IMPORTED_TARGET lilv-0)
+  pkg_check_modules(SNDFILE  REQUIRED IMPORTED_TARGET sndfile)
+
+  pkg_check_modules(OGG         IMPORTED_TARGET ogg)
+  pkg_check_modules(VORBIS      IMPORTED_TARGET vorbis)
+  pkg_check_modules(VORBISENC   IMPORTED_TARGET vorbisenc)
+
+  add_executable(opiqo-xlib
+    src/xlib/main_xlib.cpp
+    src/xlib/XlibApp.cpp
+    src/xlib/MainWindow.cpp
+    src/xlib/ControlBar.cpp
+    src/xlib/PresetBar.cpp
+    src/xlib/PluginSlot.cpp
+    src/xlib/ParameterPanel.cpp
+    src/xlib/PluginDialog.cpp
+    src/xlib/SettingsDialog.cpp
+    # Symlinked from gtk4/
+    src/xlib/AppSettings.cpp
+    src/xlib/AudioEngine.cpp
+    src/xlib/JackPortEnum.cpp
+    # Shared DSP core
+    src/LiveEffectEngine.cpp
+    src/FileWriter.cpp
+    src/LockFreeQueue.cpp
+  )
+
+  target_include_directories(opiqo-xlib PRIVATE
+    src/xlib/
+    src/
+    ${X11_LIBS_INCLUDE_DIRS}
+    ${JACK_INCLUDE_DIRS}
+    ${LILV_INCLUDE_DIRS}
+    ${SNDFILE_INCLUDE_DIRS}
+  )
+
+  target_compile_options(opiqo-xlib PRIVATE
+    ${X11_LIBS_CFLAGS_OTHER}
+    ${JACK_CFLAGS_OTHER}
+    ${LILV_CFLAGS_OTHER}
+    -DOPIQO_XLIB
+    -Wall -Wextra -Wno-unused-parameter
+  )
+
+  target_link_libraries(opiqo-xlib PRIVATE
+    PkgConfig::X11_LIBS
+    PkgConfig::JACK
+    PkgConfig::LILV
+    PkgConfig::SNDFILE
+    -lmp3lame
+    -lopus
+    -lopusenc
+    -lFLAC
+    pthread
+    dl
+  )
+
+  if(OGG_FOUND)
+    target_link_libraries(opiqo-xlib PRIVATE PkgConfig::OGG)
+  endif()
+  if(VORBIS_FOUND)
+    target_link_libraries(opiqo-xlib PRIVATE PkgConfig::VORBIS)
+  endif()
+  if(VORBISENC_FOUND)
+    target_link_libraries(opiqo-xlib PRIVATE PkgConfig::VORBISENC)
+  endif()
+
+  install(TARGETS opiqo-xlib RUNTIME DESTINATION bin)
+
+endif() # OPIQO_TARGET_PLATFORM linux-xlib

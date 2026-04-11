@@ -55,6 +55,24 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "OPIQO_TARGET_PLATFORM": "linux-gtk2"
       }
+    },
+    {
+      "name": "linux-xlib",
+      "displayName": "Linux Xlib+Xaw (JACK)",
+      "binaryDir": "${sourceDir}/build-linux-xlib",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "OPIQO_TARGET_PLATFORM": "linux-xlib"
+      }
+    },
+    {
+      "name": "linux-xlib-debug",
+      "displayName": "Linux Xlib+Xaw Debug (JACK)",
+      "binaryDir": "${sourceDir}/build-linux-xlib-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "OPIQO_TARGET_PLATFORM": "linux-xlib"
+      }
     }
   ],
   "buildPresets": [
@@ -81,6 +99,14 @@
     {
       "name": "linux-gtk2-debug",
       "configurePreset": "linux-gtk2-debug"
+    },
+    {
+      "name": "linux-xlib",
+      "configurePreset": "linux-xlib"
+    },
+    {
+      "name": "linux-xlib-debug",
+      "configurePreset": "linux-xlib-debug"
     }
   ]
 }
