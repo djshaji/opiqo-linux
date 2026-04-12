@@ -1,0 +1,408 @@
+[  4%] Building CXX object CMakeFiles/opiqo.dir/src/gtk4/MainWindow.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.h:31,
+                 from /home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.h:20,
+                 from /home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.cpp:3:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1057:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1057 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.cpp: In member function ‘void MainWindow::onAddPlugin(int)’:
+/home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.cpp:281:50: warning: ‘GtkWidget* gtk_message_dialog_new(GtkWindow*, GtkDialogFlags, GtkMessageType, GtkButtonsType, const char*, ...)’ is deprecated [-Wdeprecated-declarations]
+  281 |         GtkWidget* alert = gtk_message_dialog_new(GTK_WINDOW(window_),
+      |                            ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~
+  282 |             (GtkDialogFlags)(GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT),
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  283 |             GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  
+  284 |             "Start the engine before loading plugins");
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /usr/include/gtk-4.0/gtk/gtk.h:194,
+                 from /home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.h:13:
+/usr/include/gtk-4.0/gtk/deprecated/gtkmessagedialog.h:81:12: note: declared here
+   81 | GtkWidget* gtk_message_dialog_new      (GtkWindow      *parent,
+      |            ^~~~~~~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.cpp:286:24: warning: ‘void gtk_widget_show(GtkWidget*)’ is deprecated: Use 'gtk_widget_set_visible or gtk_window_present' instead [-Wdeprecated-declarations]
+  286 |         gtk_widget_show(alert);
+      |         ~~~~~~~~~~~~~~~^~~~~~~
+In file included from /usr/include/gtk-4.0/gtk/gtkapplication.h:26,
+                 from /usr/include/gtk-4.0/gtk/gtkwindow.h:32,
+                 from /usr/include/gtk-4.0/gtk/gtkaboutdialog.h:29,
+                 from /usr/include/gtk-4.0/gtk/gtk.h:33:
+/usr/include/gtk-4.0/gtk/gtkwidget.h:274:12: note: declared here
+  274 | void       gtk_widget_show                (GtkWidget           *widget);
+      |            ^~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.cpp: In member function ‘void MainWindow::showAboutDialog()’:
+/home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.cpp:441:20: warning: ‘void gtk_widget_show(GtkWidget*)’ is deprecated: Use 'gtk_widget_set_visible or gtk_window_present' instead [-Wdeprecated-declarations]
+  441 |     gtk_widget_show(dlg);
+      |     ~~~~~~~~~~~~~~~^~~~~
+/usr/include/gtk-4.0/gtk/gtkwidget.h:274:12: note: declared here
+  274 | void       gtk_widget_show                (GtkWidget           *widget);
+      |            ^~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.cpp: In member function ‘void MainWindow::savePluginCache() const’:
+/home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.cpp:452:17: warning: unused variable ‘dir’ [-Wunused-variable]
+  452 |     const char* dir = path.c_str();
+      |                 ^~~
+[  8%] Building CXX object CMakeFiles/opiqo.dir/src/gtk4/ParameterPanel.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/src/gtk4/ParameterPanel.h:13,
+                 from /home/djshaji/projects/opiqo-linux/src/gtk4/ParameterPanel.cpp:3:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1057:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1057 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 12%] Building CXX object CMakeFiles/opiqo.dir/src/gtk4/PluginSlot.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/src/gtk4/ParameterPanel.h:13,
+                 from /home/djshaji/projects/opiqo-linux/src/gtk4/PluginSlot.h:11,
+                 from /home/djshaji/projects/opiqo-linux/src/gtk4/PluginSlot.cpp:3:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1057:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1057 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 16%] Building CXX object CMakeFiles/opiqo.dir/src/main_linux.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.h:31,
+                 from /home/djshaji/projects/opiqo-linux/src/gtk4/MainWindow.h:20,
+                 from /home/djshaji/projects/opiqo-linux/src/main_linux.cpp:8:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1057:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1057 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 20%] Linking CXX executable opiqo
+[ 64%] Built target opiqo
+[ 68%] Building CXX object CMakeFiles/opiqo_tests.dir/src/LiveEffectEngine.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.h:31,
+                 from /home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.cpp:21:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1057:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1057 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.cpp: In member function ‘int LiveEffectEngine::addPlugin(int, std::string)’:
+/home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.cpp:187:17: warning: unused variable ‘portsTotal’ [-Wunused-variable]
+  187 |             int portsTotal = lilv_plugin_get_num_ports(plugin->plugin_);
+      |                 ^~~~~~~~~~
+[ 72%] Building CXX object CMakeFiles/opiqo_tests.dir/tests/audio_engine_stub.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.h:31,
+                 from /home/djshaji/projects/opiqo-linux/tests/audio_engine_stub.cpp:9:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1057:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1057 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 76%] Building CXX object CMakeFiles/opiqo_tests.dir/tests/test_live_effect_engine.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/src/LiveEffectEngine.h:31,
+                 from /home/djshaji/projects/opiqo-linux/tests/test_live_effect_engine.cpp:32:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1057:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1057 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 80%] Linking CXX executable opiqo_tests
+[ 88%] Built target opiqo_tests
+[ 92%] Building CXX object CMakeFiles/lv2plugin_tests.dir/tests/test_lv2plugin.cpp.o
+In file included from /home/djshaji/projects/opiqo-linux/tests/test_lv2plugin.cpp:40:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, LilvPlugin*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:453:5: warning:   when initialized here [-Wreorder]
+  453 |     LV2Plugin(LilvWorld* world, LilvPlugin* plugin, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In constructor ‘LV2Plugin::LV2Plugin(LilvWorld*, const char*, double, uint32_t)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1728:17: warning: ‘LV2Plugin::plugin_’ will be initialized after [-Wreorder]
+ 1728 |     LilvPlugin* plugin_;
+      |                 ^~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1723:12: warning:   ‘double LV2Plugin::sample_rate_’ [-Wreorder]
+ 1723 |     double sample_rate_;
+      |            ^~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1724:14: warning: ‘LV2Plugin::max_block_length_’ will be initialized after [-Wreorder]
+ 1724 |     uint32_t max_block_length_;
+      |              ^~~~~~~~~~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1719:19: warning:   ‘LilvInstance* LV2Plugin::instance_’ [-Wreorder]
+ 1719 |     LilvInstance* instance_;
+      |                   ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:462:5: warning:   when initialized here [-Wreorder]
+  462 |     LV2Plugin(LilvWorld* world, const char* plugin_uri, double sample_rate, uint32_t max_block_length)
+      |     ^~~~~~~~~
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp: In member function ‘bool LV2Plugin::saveState(const std::string&)’:
+/home/djshaji/projects/opiqo-linux/src/LV2Plugin.hpp:1057:57: warning: cast between incompatible function types from ‘void (*)(const char*, void*, const void*, uint32_t, uint32_t)’ {aka ‘void (*)(const char*, void*, const void*, unsigned int, unsigned int)’} to ‘LilvGetPortValueFunc’ {aka ‘const void* (*)(const char*, void*, unsigned int*, unsigned int*)’} [-Wcast-function-type]
+ 1057 |                                                         reinterpret_cast<LilvGetPortValueFunc>(set_port_value), this,
+      |                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ 96%] Linking CXX executable lv2plugin_tests
+[100%] Built target lv2plugin_tests

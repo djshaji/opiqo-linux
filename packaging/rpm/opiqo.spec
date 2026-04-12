@@ -1,5 +1,5 @@
 Name:           opiqo
-Version:        0.8.0
+Version:        1.21.0
 Release:        1%{?dist}
 Summary:        GTK4 LV2 plugin host with JACK audio backend
 
@@ -47,5 +47,5 @@ recording processed output, and routing audio ports.
 %{_bindir}/opiqo
 
 %changelog
-* Thu Apr 09 2026 GitHub Copilot <copilot@github.com> - 0.8.0-1
+* Thu Apr 09 2026 GitHub Copilot <copilot@github.com> - 1.21.0-1
 - Initial RPM packaging for source RPM generation

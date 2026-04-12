@@ -12,17 +12,22 @@ find_program(FIND_EXECUTABLE find)
 add_compile_options(-g)
 set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 
-message(STATUS "Using manual build_version file")
+# Derive RPM package version from the build_version counter file.
+# Result: OPIQO_RPM_VERSION = "1.<build_version>.0", e.g. "1.21.0".
+file(READ "${CMAKE_SOURCE_DIR}/build_version" _build_ver_raw)
+string(STRIP "${_build_ver_raw}" OPIQO_BUILD_VERSION)
+set(OPIQO_RPM_VERSION   "1.${OPIQO_BUILD_VERSION}.0")
+message(STATUS "RPM version: ${OPIQO_RPM_VERSION}")
 
-set(OPIQO_RPM_TOPDIR "${CMAKE_SOURCE_DIR}/packaging/rpm")
-set(OPIQO_RPM_TARBALL "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}.tar.gz")
-set(OPIQO_RPM_SPEC_SRC "${OPIQO_RPM_TOPDIR}/opiqo.spec")
-set(OPIQO_RPM_SPEC_DST "${OPIQO_RPM_TOPDIR}/SPECS/opiqo.spec")
+set(OPIQO_RPM_TOPDIR    "${CMAKE_SOURCE_DIR}/packaging/rpm")
+set(OPIQO_RPM_STAGENAME "opiqo-${OPIQO_RPM_VERSION}")
+set(OPIQO_RPM_STAGEDIR  "${OPIQO_RPM_TOPDIR}/SOURCES/${OPIQO_RPM_STAGENAME}")
+set(OPIQO_RPM_TARBALL   "${OPIQO_RPM_TOPDIR}/SOURCES/opiqo-${OPIQO_RPM_VERSION}.tar.gz")
 
 set(OPIQO_SRPM_PRUNE_COMMANDS)
 if(FIND_EXECUTABLE)
   list(APPEND OPIQO_SRPM_PRUNE_COMMANDS
-    COMMAND ${FIND_EXECUTABLE} "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}"
+    COMMAND ${FIND_EXECUTABLE} "${OPIQO_RPM_STAGEDIR}"
       -type f
       \(
         -name "*.o" -o
@@ -38,37 +43,50 @@ else()
 endif()
 
 if(RPMBUILD_EXECUTABLE)
-  add_custom_target(srpm
-    COMMAND ${CMAKE_COMMAND} -E make_directory
-      "${OPIQO_RPM_TOPDIR}/BUILD"
-      "${OPIQO_RPM_TOPDIR}/BUILDROOT"
-      "${OPIQO_RPM_TOPDIR}/RPMS"
-      "${OPIQO_RPM_TOPDIR}/SOURCES"
-      "${OPIQO_RPM_TOPDIR}/SPECS"
-      "${OPIQO_RPM_TOPDIR}/SRPMS"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${OPIQO_RPM_SPEC_SRC}" "${OPIQO_RPM_SPEC_DST}"
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}"
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/src" "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}/src"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/CMakeLists.txt" "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}/CMakeLists.txt"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/CMakePresets.json" "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}/CMakePresets.json"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/README-gtk4.md" "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}/README-gtk4.md"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/Makefile" "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}/Makefile"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/LICENSE" "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}/LICENSE"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/build_version" "${OPIQO_RPM_TOPDIR}/SOURCES/${PROJECT_NAME}-${PROJECT_VERSION}/build_version"
-    ${OPIQO_SRPM_PRUNE_COMMANDS}
-    COMMAND ${CMAKE_COMMAND} -E tar cfvz "${OPIQO_RPM_TARBALL}"
-      --format=gnutar
-      -- "${PROJECT_NAME}-${PROJECT_VERSION}"
-    COMMAND ${RPMBUILD_EXECUTABLE} -bs
-      --define "_topdir ${OPIQO_RPM_TOPDIR}"
-      "${OPIQO_RPM_SPEC_DST}"
-    WORKING_DIRECTORY "${OPIQO_RPM_TOPDIR}/SOURCES"
-    COMMENT "Building source RPM in ${OPIQO_RPM_TOPDIR}/SRPMS"
-    VERBATIM
+  # One srpm-<variant> target per frontend.  All variants share the same
+  # source tarball (opiqo-<version>.tar.gz) but use a different spec file.
+  # Targets: srpm-gtk4  srpm-gtk3  srpm-gtk2  srpm-xlib
+  # Do NOT run multiple srpm-* targets in parallel; they share the staging dir.
+  foreach(_variant IN ITEMS gtk4 gtk3 gtk2 xlib)
+    set(_spec_src "${OPIQO_RPM_TOPDIR}/opiqo-${_variant}.spec")
+    set(_spec_dst "${OPIQO_RPM_TOPDIR}/SPECS/opiqo-${_variant}.spec")
+    add_custom_target(srpm-${_variant}
+      COMMAND ${CMAKE_COMMAND} -E make_directory
+        "${OPIQO_RPM_TOPDIR}/BUILD"
+        "${OPIQO_RPM_TOPDIR}/BUILDROOT"
+        "${OPIQO_RPM_TOPDIR}/RPMS"
+        "${OPIQO_RPM_TOPDIR}/SOURCES"
+        "${OPIQO_RPM_TOPDIR}/SPECS"
+        "${OPIQO_RPM_TOPDIR}/SRPMS"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_spec_src}" "${_spec_dst}"
+      COMMAND ${CMAKE_COMMAND} -E remove_directory  "${OPIQO_RPM_STAGEDIR}"
+      COMMAND ${CMAKE_COMMAND} -E make_directory    "${OPIQO_RPM_STAGEDIR}"
+      COMMAND ${CMAKE_COMMAND} -E copy_directory    "${CMAKE_SOURCE_DIR}/src"                "${OPIQO_RPM_STAGEDIR}/src"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/CMakeLists.txt"    "${OPIQO_RPM_STAGEDIR}/CMakeLists.txt"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/CMakePresets.json" "${OPIQO_RPM_STAGEDIR}/CMakePresets.json"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/README-gtk4.md"   "${OPIQO_RPM_STAGEDIR}/README-gtk4.md"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/Makefile"         "${OPIQO_RPM_STAGEDIR}/Makefile"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/LICENSE"          "${OPIQO_RPM_STAGEDIR}/LICENSE"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_SOURCE_DIR}/build_version"    "${OPIQO_RPM_STAGEDIR}/build_version"
+      ${OPIQO_SRPM_PRUNE_COMMANDS}
+      COMMAND ${CMAKE_COMMAND} -E tar cfvz "${OPIQO_RPM_TARBALL}"
+        --format=gnutar
+        -- "${OPIQO_RPM_STAGENAME}"
+      COMMAND ${RPMBUILD_EXECUTABLE} -bs
+        --define "_topdir ${OPIQO_RPM_TOPDIR}"
+        "${_spec_dst}"
+      WORKING_DIRECTORY "${OPIQO_RPM_TOPDIR}/SOURCES"
+      COMMENT "Building SRPM: opiqo-${_variant} ${OPIQO_RPM_VERSION} → ${OPIQO_RPM_TOPDIR}/SRPMS"
+      VERBATIM
+    )
+  endforeach()
+
+  # Legacy 'srpm' target — equivalent to srpm-gtk4; kept for backward compat.
+  add_custom_target(srpm DEPENDS srpm-gtk4
+    COMMENT "Use srpm-gtk4 / srpm-gtk3 / srpm-gtk2 / srpm-xlib for specific variants"
   )
 else()
-  message(STATUS "srpm target disabled (requires rpmbuild)")
+  message(STATUS "srpm targets disabled (rpmbuild not found)")
 endif()
 
 # ─── Linux / GTK4 / JACK target ──────────────────────────────────────────────
