@@ -78,8 +78,10 @@ void XlibApp::initSelfPipe() {
         perror("XlibApp: pipe()");
         return;
     }
-    // Make write-end non-blocking so JACK RT thread never blocks
+    // Make both ends non-blocking: write so JACK RT thread never blocks,
+    // read so pipeReady() drain-loop exits instead of blocking on empty pipe.
     fcntl(pipeFd_[1], F_SETFL, fcntl(pipeFd_[1], F_GETFL) | O_NONBLOCK);
+    fcntl(pipeFd_[0], F_SETFL, fcntl(pipeFd_[0], F_GETFL) | O_NONBLOCK);
 
     pipeInputId_ = XtAppAddInput(appCtx_,
         pipeFd_[0],
